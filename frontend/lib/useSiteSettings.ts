@@ -195,6 +195,7 @@ export function useSiteSettings() {
   const hero: HeroSettings = {
     ...heroRaw,
     heroImageUrl: rewriteAssetUrl(heroRaw.heroImageUrl),
+    heroVideoUrl: rewriteAssetUrl(heroRaw.heroVideoUrl),
   };
 
   const testimonials: Testimonial[] = Array.isArray(data?.testimonials) && data.testimonials.length > 0
