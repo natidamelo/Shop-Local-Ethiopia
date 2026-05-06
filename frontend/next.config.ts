@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 function getApiOrigin(raw?: string): string {
-  const fallback = 'http://localhost:8000';
+  const fallback = 'http://localhost:8001';
   if (!raw) return fallback;
   return raw.replace(/\/+$/, '').replace(/\/api$/, '');
 }

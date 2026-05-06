@@ -135,6 +135,33 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'ShopL API is running', timestamp: new Date().toISOString() });
 });
 
+// One-time admin setup — protected by SETUP_SECRET env var
+// Call: GET /api/setup-admin?secret=YOUR_SETUP_SECRET&password=YourPassword
+app.get('/api/setup-admin', async (req, res) => {
+  const setupSecret = process.env.SETUP_SECRET;
+  if (!setupSecret || req.query.secret !== setupSecret) {
+    return res.status(403).json({ success: false, message: 'Forbidden' });
+  }
+  try {
+    const User = require('./src/models/User');
+    const adminEmail = 'kinfenati7@gmail.com';
+    const adminPassword = req.query.password || 'Admin@123';
+    let user = await User.findOne({ email: adminEmail }).select('+password');
+    if (user) {
+      user.role = 'admin';
+      user.emailVerified = true;
+      user.isSuspended = false;
+      if (req.query.password) user.password = adminPassword;
+      await user.save();
+      return res.json({ success: true, message: `Updated ${adminEmail} to admin`, action: 'updated' });
+    }
+    await User.create({ name: 'Kinfenati', email: adminEmail, password: adminPassword, role: 'admin', emailVerified: true });
+    res.json({ success: true, message: `Created admin: ${adminEmail}`, action: 'created', password: adminPassword });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Error handling
 app.use(notFound);
 app.use(errorHandler);
