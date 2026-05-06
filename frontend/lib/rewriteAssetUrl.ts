@@ -8,8 +8,9 @@ export function rewriteAssetUrl(url: string | undefined): string {
   try {
     const u = new URL(url);
     if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
-      const port = process.env.NEXT_PUBLIC_API_PORT || '8001';
-      return `${window.location.protocol}//${window.location.hostname}:${port}${u.pathname}${u.search}`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const backendOrigin = apiUrl ? new URL(apiUrl).origin : window.location.origin;
+      return `${backendOrigin}${u.pathname}${u.search}`;
     }
   } catch {
     // ignore

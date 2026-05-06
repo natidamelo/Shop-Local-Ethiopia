@@ -1,12 +1,11 @@
 import axios from 'axios';
 
-/** Backend API base URL. In the browser we always use the same host as the page so the phone gets the same backend as your PC. */
+/** Backend API base URL. In the browser use Next.js rewrite proxy (/api). */
 function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
-    const port = process.env.NEXT_PUBLIC_API_PORT || '8001';
-    return `${window.location.protocol}//${window.location.hostname}:${port}/api`;
+    return '/api';
   }
-  return process.env.NEXT_PUBLIC_API_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_PORT || '8001'}/api`;
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
 }
 
 const api = axios.create({
