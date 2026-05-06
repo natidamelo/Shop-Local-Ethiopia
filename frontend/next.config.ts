@@ -1,5 +1,11 @@
 import type { NextConfig } from 'next';
 
+function getApiOrigin(raw?: string): string {
+  const fallback = 'http://localhost:8000';
+  if (!raw) return fallback;
+  return raw.replace(/\/+$/, '').replace(/\/api$/, '');
+}
+
 const nextConfig: NextConfig = {
   // Allow dev server to serve assets when opened from another device (e.g. phone at http://192.168.1.5:3000)
   allowedDevOrigins: ['http://192.168.1.5:3000', 'http://10.2.0.2:3000'],
@@ -13,10 +19,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const apiOrigin = getApiOrigin(process.env.NEXT_PUBLIC_API_URL);
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/:path*`,
+        destination: `${apiOrigin}/api/:path*`,
       },
     ];
   },
