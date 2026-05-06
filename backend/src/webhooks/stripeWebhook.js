@@ -1,10 +1,21 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+function getStripeClient() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key || key.includes('your_stripe')) return null;
+  // Lazily create Stripe client so missing keys don't crash the server on startup
+  return require('stripe')(key);
+}
 const Order = require('../models/Order');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const { sendOrderConfirmationEmail } = require('../utils/email');
 
 const stripeWebhookHandler = async (req, res) => {
+  const stripe = getStripeClient();
+  if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) {
+    // Don't crash production if Stripe isn't configured; respond so webhook retries don't loop forever
+    return res.status(503).json({ received: false, message: 'Stripe is not configured' });
+  }
+
   const sig = req.headers['stripe-signature'];
   let event;
 

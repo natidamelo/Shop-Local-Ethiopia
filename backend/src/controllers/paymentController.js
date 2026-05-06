@@ -1,4 +1,9 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+function getStripeClient() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key || key.includes('your_stripe')) return null;
+  // Lazily create Stripe client so missing keys don't crash the server on startup
+  return require('stripe')(key);
+}
 const axios = require('axios');
 const Order = require('../models/Order');
 const Payment = require('../models/Payment');
@@ -13,6 +18,14 @@ const stripeCreateIntent = async (req, res, next) => {
       return res.status(503).json({ 
         success: false, 
         message: 'Card payment is not available at the moment. Please choose another payment method.' 
+      });
+    }
+
+    const stripe = getStripeClient();
+    if (!stripe) {
+      return res.status(503).json({
+        success: false,
+        message: 'Card payment is not available at the moment. Please choose another payment method.',
       });
     }
 
