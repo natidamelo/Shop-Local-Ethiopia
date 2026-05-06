@@ -19,14 +19,14 @@ export function getCategoryUrl(category: { slug: string } | string): string {
 /** URL for a product: /shop/[categorySlug]/[productSlug]. Pass product with category populated (name, slug). */
 export function getProductUrl(product: {
   slug: string;
-  category?: { slug: string } | string | null;
+  category?: { slug?: string } | string | null;
 }): string {
   const categorySlug =
     product.category == null
       ? 'uncategorized'
       : typeof product.category === 'string'
         ? product.category
-        : (product.category as { slug: string }).slug ?? 'uncategorized';
+        : (product.category as { slug?: string }).slug ?? 'uncategorized';
   return `${SHOP_PATH}/${encodeURIComponent(categorySlug)}/${encodeURIComponent(product.slug)}`;
 }
 

@@ -1,8 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Use webpack for dev to avoid Turbopack/PostCSS panic with globals.css (use "dev:turbo" for Turbopack)
-  turbopack: false,
   // Allow dev server to serve assets when opened from another device (e.g. phone at http://192.168.1.5:3000)
   allowedDevOrigins: ['http://192.168.1.5:3000', 'http://10.2.0.2:3000'],
   images: {

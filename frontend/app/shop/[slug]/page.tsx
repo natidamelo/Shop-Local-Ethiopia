@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -67,7 +67,7 @@ function SortDropdown({ value, onChange }: { value: string; onChange: (v: string
 }
 
 /** Single dynamic segment [slug]: category listing, or legacy product redirect. */
-export default function ShopSlugPage() {
+function ShopSlugInner() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -254,5 +254,13 @@ export default function ShopSlugPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function ShopSlugPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background"><Navbar /><div className="pt-24 flex justify-center"><Skeleton className="h-64 w-64" /></div><Footer /></div>}>
+      <ShopSlugInner />
+    </Suspense>
   );
 }

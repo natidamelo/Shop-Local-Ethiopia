@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Search, Edit, Trash2, Package, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import api from '@/lib/api';
 import { useSiteSettings, formatPrice } from '@/lib/useSiteSettings';
 import { toast } from 'sonner';
 
-export default function AdminProductsPage() {
+function AdminProductsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categorySlug = searchParams.get('category') || '';
@@ -176,5 +176,13 @@ export default function AdminProductsPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function AdminProductsPage() {
+  return (
+    <Suspense fallback={<div className="p-6"><Skeleton className="h-10 w-full" /></div>}>
+      <AdminProductsInner />
+    </Suspense>
   );
 }

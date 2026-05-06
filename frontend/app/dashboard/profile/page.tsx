@@ -23,7 +23,7 @@ export default function ProfilePage() {
     if (user) {
       setForm({ name: user.name || '', email: user.email || '', phone: user.phone || '' });
     }
-  }, [user?.id, user?.name, user?.email, user?.phone]);
+  }, [user?._id, user?.name, user?.email, user?.phone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

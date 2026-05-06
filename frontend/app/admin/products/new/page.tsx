@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft, Upload, X, Image as ImageIcon, Eye, Save, Globe, Calendar,
@@ -281,7 +281,7 @@ const emptyProduct = {
   shippingOverrides: {} as Record<string, string>,
 };
 
-export default function AddEditProductPage() {
+function AddEditProductInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
@@ -1231,5 +1231,13 @@ export default function AddEditProductPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function AddEditProductPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+      <AddEditProductInner />
+    </Suspense>
   );
 }
