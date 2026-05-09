@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   Package, DollarSign, ShoppingBag, TrendingUp, ArrowRight, Clock,
-  Sparkles, Star, Heart, ShoppingCart, Gift, Flame
+  Sparkles, Star, Heart, ShoppingCart, Gift, Flame, Printer
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,15 +72,17 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Navbar />
-      <div className="space-y-8 pb-6">
+      <div className="print:hidden">
+        <Navbar />
+      </div>
+      <div className="space-y-8 pb-6 print:space-y-4 print:p-0">
 
         {/* Hero Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 p-7 sm:p-8 shadow-xl ring-1 ring-white/15"
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 p-7 sm:p-8 shadow-xl ring-1 ring-white/15 print:bg-none print:shadow-none print:ring-0 print:text-black print:border print:border-gray-300 print:rounded-none"
         >
           {/* Background decorations */}
           <div className="absolute inset-0 overflow-hidden">
@@ -95,18 +97,22 @@ export default function DashboardPage() {
                 <Sparkles className="w-5 h-5 text-white/80" />
                 <span className="text-white/80 text-sm font-medium">{greeting()}</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
+              <h1 className="text-3xl md:text-4xl font-bold text-white print:text-black">
                 Welcome back, {user?.name?.split(' ')[0]}!
               </h1>
-              <p className="text-white/80 text-base max-w-md">
+              <p className="text-white/80 print:text-gray-700 text-base max-w-md">
                 Discover new handmade cultural items and track your orders — all in one place.
               </p>
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap gap-3 pt-2 print:hidden">
                 <Button className="bg-white text-amber-700 hover:bg-amber-50 font-semibold shadow-md" asChild>
                   <Link href="/shop">
                     <ShoppingBag className="w-4 h-4 mr-2" />
                     Shop Now
                   </Link>
+                </Button>
+                <Button onClick={() => window.print()} className="bg-white text-amber-700 hover:bg-amber-50 font-semibold shadow-md border-0">
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print Dashboard
                 </Button>
                 <Button className="bg-white text-amber-700 hover:bg-amber-50 font-semibold shadow-md border-0" asChild>
                   <Link href="/dashboard/orders">
@@ -117,7 +123,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Hero Emojis */}
-            <div className="hidden md:grid grid-cols-2 gap-3 shrink-0">
+            <div className="hidden md:grid grid-cols-2 gap-3 shrink-0 print:hidden">
               {['☕', '🧺', '📿', '🫓'].map((emoji, i) => (
                 <motion.div
                   key={i}
@@ -141,7 +147,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100/70 dark:border-white/10"
+              className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100/70 dark:border-white/10 print:shadow-none print:border-gray-300 print:rounded-none"
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${card.color}`}>
                 <card.icon className="w-5 h-5" />
@@ -157,7 +163,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Recommended Items */}
-        <div>
+        <div className="print:hidden">
           <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -242,15 +248,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100/70 dark:border-white/10">
+        <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100/70 dark:border-white/10 print:bg-white print:border-none print:shadow-none">
           <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
-                <Package className="w-4 h-4 text-violet-600" />
+              <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center print:bg-gray-100">
+                <Package className="w-4 h-4 text-violet-600 print:text-gray-800" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Orders</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white print:text-black">Recent Orders</h2>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" asChild className="print:hidden">
               <Link href="/dashboard/orders" className="text-violet-600 flex items-center gap-1 hover:text-violet-700">
                 View all <ArrowRight className="w-4 h-4" />
               </Link>
