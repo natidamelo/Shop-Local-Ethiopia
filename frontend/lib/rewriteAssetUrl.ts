@@ -1,20 +1,34 @@
 /**
- * Rewrite image URLs that use localhost/127.0.0.1 so they work when the site is
- * opened from another device (e.g. phone at 192.168.1.5:3000). On the phone,
- * "localhost" points to the phone itself, so images from your PC backend won't load.
+ * Rewrite image/asset URLs so they work in every environment (local dev,
+ * production, SSR, and client).
+ *
+ * Strategy: if the URL points to the backend uploads directory (e.g.
+ * http://localhost:8001/uploads/xxx.jpg  or
+ * https://my-render-backend.onrender.com/uploads/xxx.jpg),
+ * strip the origin and return just the pathname (/uploads/xxx.jpg).
+ *
+ * The Next.js rewrite in next.config.ts proxies /uploads/* to the real
+ * backend, so relative paths work everywhere without CORS issues.
  */
 export function rewriteAssetUrl(url: string | undefined): string {
-  if (typeof window === 'undefined' || !url || !url.startsWith('http')) return url || '';
-  try {
-    const u = new URL(url);
-    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const backendOrigin = apiUrl ? new URL(apiUrl).origin : window.location.origin;
-      return `${backendOrigin}${u.pathname}${u.search}`;
+  if (!url) return '';
+
+  // Already a relative path — nothing to rewrite
+  if (url.startsWith('/')) return url;
+
+  // Absolute URL — extract the pathname so the Next.js proxy handles it
+  if (url.startsWith('http')) {
+    try {
+      const u = new URL(url);
+      // Only rewrite URLs that point to /uploads (our backend assets)
+      if (u.pathname.startsWith('/uploads')) {
+        return u.pathname + u.search;
+      }
+    } catch {
+      // malformed URL — fall through
     }
-  } catch {
-    // ignore
   }
+
   return url;
 }
 
