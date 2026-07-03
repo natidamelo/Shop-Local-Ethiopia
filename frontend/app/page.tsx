@@ -179,21 +179,21 @@ export default function HomePage() {
         {/* Pattern overlay */}
         <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg,#b8860b 0,#b8860b 1px,transparent 0,transparent 50%)', backgroundSize: '14px 14px', zIndex: 2 }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16" style={{ zIndex: 3 }}>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10" style={{ zIndex: 3 }}>
           <div className="grid lg:grid-cols-2 gap-8 items-center">
 
             {/* Left — text (on mobile appears below hero image) */}
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="space-y-5 order-2 lg:order-none">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="space-y-4 order-2 lg:order-none">
 
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2">
                 {hero.badge1 && (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(212,162,76,0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212,162,76,0.3)' }}>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] lg:text-xs font-semibold rounded-full" style={{ background: 'rgba(212,162,76,0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212,162,76,0.3)' }}>
                     <MapPin className="w-3 h-3" /> {hero.badge1}
                   </span>
                 )}
                 {hero.badge2 && (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(212,162,76,0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212,162,76,0.3)' }}>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] lg:text-xs font-semibold rounded-full" style={{ background: 'rgba(212,162,76,0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212,162,76,0.3)' }}>
                     {hero.badge2}
                   </span>
                 )}
@@ -201,7 +201,7 @@ export default function HomePage() {
 
               {/* Headline */}
               <div>
-                <h1 className="font-extrabold leading-[1.08] tracking-tight text-white" style={{ fontSize: 'clamp(2.6rem,5.5vw,4.5rem)' }}>
+                <h1 className="font-extrabold leading-[1.08] tracking-tight text-white" style={{ fontSize: 'clamp(2.1rem, 4.2vw, 3.25rem)' }}>
                   {hero.headlineLine1}<br />
                   <span style={{ color: 'var(--gold-500)' }}>{hero.headlineLine2}</span>{' '}
                   {(() => {
@@ -210,12 +210,12 @@ export default function HomePage() {
                     return <><span className="text-[var(--white)]">{words.slice(0, -1).join(' ')}</span>{' '}<span style={{ color: 'var(--gold-500)' }}>{words[words.length - 1]}</span></>;
                   })()}
                 </h1>
-                <div className="mt-4">
-                  <div className="h-1 w-24 rounded-full" style={{ background: 'var(--gold-500)' }} />
+                <div className="mt-3">
+                  <div className="h-1 w-20 rounded-full" style={{ background: 'var(--gold-500)' }} />
                 </div>
               </div>
 
-              <p className="text-base lg:text-lg leading-relaxed max-w-lg" style={{ color: 'var(--white)', opacity: 0.85 }}>
+              <p className="text-sm lg:text-base leading-relaxed max-w-md" style={{ color: 'var(--white)', opacity: 0.85 }}>
                 {hero.description}
               </p>
 
@@ -229,7 +229,7 @@ export default function HomePage() {
                         backgroundColor: btn.style === 'primary' ? 'var(--gold-600)' : 'rgba(44, 74, 124, 0.15)'
                       }}
                       whileTap={{ scale: 0.97 }}
-                      className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-bold transition-all"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 text-sm lg:text-base font-bold transition-all"
                       style={btn.style === 'primary'
                         ? { background: 'var(--gold-500)', color: 'var(--white)', borderRadius: '6px', boxShadow: '0 4px 24px rgba(212, 162, 76, 0.3)' }
                         : { background: 'transparent', border: '2px solid var(--navy-600)', color: 'var(--white)', borderRadius: '6px' }
@@ -243,10 +243,10 @@ export default function HomePage() {
               </div>
 
               {/* Social proof */}
-              <div className="flex items-center gap-4 pt-2">
+              <div className="flex items-center gap-3 pt-1">
                 <div className="flex -space-x-2">
                   {['A','B','C','D'].map((l, i) => (
-                    <div key={i} className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-[var(--white)] text-xs font-bold"
+                    <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-[var(--white)] text-xs font-bold"
                       style={{ borderColor: 'var(--navy-800)', background: i % 2 === 0 ? 'var(--gold-500)' : 'var(--navy-600)' }}>
                       {l}
                     </div>
@@ -256,7 +256,7 @@ export default function HomePage() {
                   <div className="flex gap-0.5">
                     {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                   </div>
-                  <p className="text-sm mt-0.5" style={{ color: 'var(--white)', opacity: 0.6 }}>{hero.socialProofText}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--white)', opacity: 0.6 }}>{hero.socialProofText}</p>
                 </div>
               </div>
             </motion.div>
@@ -265,11 +265,11 @@ export default function HomePage() {
             <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
               className="relative flex justify-center lg:justify-end order-first lg:order-none">
               {(hero.heroMediaType ?? 'image') === 'video' && hero.heroVideoUrl ? (
-                <div className="relative overflow-hidden rounded-xl w-full max-h-[260px] lg:max-h-[380px]" style={{ aspectRatio: '3/4' }}>
+                <div className="relative overflow-hidden rounded-xl w-full max-w-md lg:max-w-lg shadow-2xl" style={{ aspectRatio: '4/3', maxHeight: '320px' }}>
                   <div className="absolute -inset-3 rounded-2xl rotate-2 opacity-20 hidden lg:block" style={{ background: ETH_GOLD }} />
                   <video
                     src={hero.heroVideoUrl}
-                    className="relative rounded-xl shadow-2xl w-full h-full object-cover"
+                    className="relative rounded-xl w-full h-full object-cover"
                     autoPlay={hero.heroVideoAutoplay ?? true}
                     loop={hero.heroVideoLoop ?? true}
                     muted={hero.heroVideoMuted ?? true}
@@ -277,12 +277,12 @@ export default function HomePage() {
                   />
                 </div>
               ) : (hero.heroMediaType ?? 'image') === 'image' && hero.heroImageUrl ? (
-                <div className="relative overflow-hidden rounded-xl w-full max-h-[260px] lg:max-h-[380px]" style={{ aspectRatio: '3/4' }}>
+                <div className="relative overflow-hidden rounded-xl w-full max-w-md lg:max-w-lg shadow-2xl" style={{ aspectRatio: '4/3', maxHeight: '320px' }}>
                   <div className="absolute -inset-3 rounded-2xl rotate-2 opacity-20 hidden lg:block" style={{ background: ETH_GOLD }} />
                   <img
                     src={hero.heroImageUrl}
                     alt="Hero"
-                    className="relative rounded-xl shadow-2xl w-full h-full object-cover"
+                    className="relative rounded-xl w-full h-full object-cover"
                     style={{
                       objectFit: hero.heroImageObjectFit ?? 'cover',
                       objectPosition: hero.heroImagePosition ?? 'center',
@@ -292,12 +292,12 @@ export default function HomePage() {
                   />
                 </div>
               ) : (
-                <div className="relative overflow-hidden rounded-xl w-full max-h-[260px] lg:max-h-[380px]" style={{ aspectRatio: '3/4' }}>
+                <div className="relative overflow-hidden rounded-xl w-full max-w-md lg:max-w-lg shadow-2xl" style={{ aspectRatio: '4/3', maxHeight: '320px' }}>
                   <div className="absolute -inset-3 rounded-2xl rotate-2 opacity-20 hidden lg:block" style={{ background: 'var(--gold-500)' }} />
                   <img
                     src="/how-product-made.png"
                     alt="Authentic Ethiopian Handcraft"
-                    className="relative rounded-xl shadow-2xl w-full h-full object-cover"
+                    className="relative rounded-xl w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex items-end p-4">
                     <p className="text-xs text-white/90 italic">Authentic hand-woven textiles & apparel</p>

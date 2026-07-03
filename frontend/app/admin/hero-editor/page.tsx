@@ -917,7 +917,7 @@ export default function HeroEditorPage() {
                     </div>
 
                     {/* Right — hero media preview */}
-                    <div className="relative flex justify-end overflow-hidden rounded-lg" style={{ aspectRatio: '3/4', maxHeight: '180px' }}>
+                    <div className="relative flex justify-end overflow-hidden rounded-lg" style={{ aspectRatio: '4/3', maxHeight: '180px' }}>
                       {(hero.heroMediaType ?? 'image') === 'video' && heroVideoPreview ? (
                         <video
                           src={heroVideoPreview}
@@ -939,7 +939,7 @@ export default function HeroEditorPage() {
                           }}
                         />
                       ) : (
-                        <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: '3/4', maxHeight: '180px', background: 'rgba(184,134,11,0.08)', border: '1px dashed rgba(184,134,11,0.2)' }}>
+                        <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: '4/3', maxHeight: '180px', background: 'rgba(184,134,11,0.08)', border: '1px dashed rgba(184,134,11,0.2)' }}>
                           <div className="text-center space-y-1">
                             <div className="text-2xl">☕ 🧺 📿</div>
                             <p className="text-[7px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
