@@ -331,7 +331,7 @@ export default function HomePage() {
               return (
                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} whileHover={{ y: -4 }}>
                   <Link href={cat.href} className="flex flex-col items-center gap-3 p-2 text-center group transition-all overflow-hidden">
-                    <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto rounded-full flex items-center justify-center text-3xl transition-transform group-hover:scale-105 overflow-hidden flex-shrink-0 shadow-sm"
+                    <div className="w-36 h-36 lg:w-40 lg:h-40 mx-auto rounded-full flex items-center justify-center text-4xl transition-transform group-hover:scale-105 overflow-hidden flex-shrink-0 shadow-sm"
                       style={{ background: 'var(--eth-icon-bg)', border: '1px solid var(--eth-border)' }}>
                       {coverUrl ? (
                         <img
