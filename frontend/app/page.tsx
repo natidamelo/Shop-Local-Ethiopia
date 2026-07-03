@@ -130,7 +130,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── HERO BANNER ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-16" style={{ background: '#0a192f' }}>
+      <section className="relative overflow-hidden pt-16" style={{ background: '#1e40af' }}>
         {/* Flag stripe */}
         <div className="h-1 w-full flex">
           <div className="flex-1" style={{ background: ETH_GREEN }} />
@@ -149,7 +149,7 @@ export default function HomePage() {
               muted={hero.heroVideoMuted ?? true}
               playsInline
             />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #0a192f 0%, #0a192fee 40%, #0a192f99 60%, transparent 75%)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #1e40af 0%, #1e40afee 40%, #1e40af99 60%, transparent 75%)' }} />
           </div>
         )}
 
@@ -167,13 +167,13 @@ export default function HomePage() {
                 transformOrigin: 'center center',
               }}
             />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #0a192f 0%, #0a192fee 40%, #0a192f99 60%, transparent 75%)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #1e40af 0%, #1e40afee 40%, #1e40af99 60%, transparent 75%)' }} />
           </div>
         )}
 
         {/* Diagonal accent */}
         {!(hero.heroMediaType === 'video' ? hero.heroVideoUrl : hero.heroImageUrl) && (
-          <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(155deg, #0a192f 55%, ${ETH_GOLD}22 55%, ${ETH_GOLD}11 100%)` }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(155deg, #1e40af 55%, ${ETH_GOLD}22 55%, ${ETH_GOLD}11 100%)` }} />
         )}
 
         {/* Pattern overlay */}
@@ -244,7 +244,7 @@ export default function HomePage() {
                 <div className="flex -space-x-2">
                   {['A','B','C','D'].map((l, i) => (
                     <div key={i} className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold"
-                      style={{ borderColor: '#0a192f', background: i % 2 === 0 ? ETH_GOLD : ETH_GREEN }}>
+                      style={{ borderColor: '#1e40af', background: i % 2 === 0 ? ETH_GOLD : ETH_GREEN }}>
                       {l}
                     </div>
                   ))}
@@ -565,7 +565,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA BANNER ───────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden" style={{ background: '#050c1a' }}>
+      <section className="relative overflow-hidden" style={{ background: '#0b1e42' }}>
         {/* Ethiopian flag accent stripe */}
         <div className="h-1 w-full flex">
           <div className="flex-1" style={{ background: ETH_GREEN }} />
@@ -580,7 +580,7 @@ export default function HomePage() {
             alt="Ethiopian cultural market"
             className="absolute inset-0 w-full h-full object-cover opacity-25"
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #050c1a 50%, transparent 100%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #0b1e42 50%, transparent 100%)' }} />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
