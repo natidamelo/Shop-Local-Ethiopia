@@ -82,23 +82,23 @@
   --sidebar-ring: oklch(0.708 0 0);
   /* Ethiopian palette — light */
   --eth-gold: #b8860b;
-  --eth-gold-light: #f5e6c8;
+  --eth-gold-light: #e0eaf4;
   --eth-gold-muted: #9e7a2e;
-  --eth-dark: #3d2b0e;
-  --eth-dark-2: #2a1a06;
-  --eth-warm: #fff8ee;
-  --eth-cream: #fdf6ec;
-  --eth-border: #e8d5b0;
+  --eth-dark: #0b192c;
+  --eth-dark-2: #050a14;
+  --eth-warm: #f0f4f8;
+  --eth-cream: #f8fafc;
+  --eth-border: #cbd5e1;
   --eth-green: #2d6a2d;
   --eth-red: #c0392b;
-  --eth-nav-bg: rgba(253,246,236,0.97);
-  --eth-text-primary: #3d2b0e;
-  --eth-text-secondary: #7a5c1e;
-  --eth-text-muted: #9e7a2e;
-  --eth-card-bg: #fff8ee;
-  --eth-icon-bg: #f5e6c8;
-  --eth-section-bg: #fdf6ec;
-  --eth-footer-bg: #1a0d00;
+  --eth-nav-bg: rgba(240, 244, 248, 0.95);
+  --eth-text-primary: #0f172a;
+  --eth-text-secondary: #334155;
+  --eth-text-muted: #64748b;
+  --eth-card-bg: #ffffff;
+  --eth-icon-bg: #e2e8f0;
+  --eth-section-bg: #f8fafc;
+  --eth-footer-bg: #0a192f;
 }
 
 .dark {
@@ -137,21 +137,21 @@
   --eth-gold: #d4a017;
   --eth-gold-light: rgba(212,160,23,0.15);
   --eth-gold-muted: #c4903a;
-  --eth-dark: #f5e6c8;
-  --eth-dark-2: #0d0a06;
-  --eth-footer-bg: #0d0a06;
-  --eth-warm: #1c1610;
-  --eth-cream: #161209;
-  --eth-border: rgba(184,134,11,0.25);
+  --eth-dark: #f1f5f9;
+  --eth-dark-2: #080d1a;
+  --eth-footer-bg: #070b19;
+  --eth-warm: #0f172a;
+  --eth-cream: #0b1329;
+  --eth-border: #1e293b;
   --eth-green: #4a9e4a;
   --eth-red: #e05252;
-  --eth-nav-bg: rgba(15,12,8,0.97);
-  --eth-text-primary: #f5e6c8;
-  --eth-text-secondary: #d4b896;
-  --eth-text-muted: #c4903a;
-  --eth-card-bg: #1c1610;
-  --eth-icon-bg: rgba(184,134,11,0.15);
-  --eth-section-bg: #161209;
+  --eth-nav-bg: rgba(11, 19, 41, 0.95);
+  --eth-text-primary: #f8fafc;
+  --eth-text-secondary: #cbd5e1;
+  --eth-text-muted: #94a3b8;
+  --eth-card-bg: #1e293b;
+  --eth-icon-bg: #1e293b;
+  --eth-section-bg: #0b1329;
 }
 
 @layer base {

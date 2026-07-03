@@ -8,7 +8,7 @@ export default function Footer() {
   const { siteName, logoUrl, tagline, contactEmail, contactPhone, contactAddress } = useSiteSettings();
 
   return (
-    <footer className="text-gray-300 dark:text-gray-400 bg-[#1a0d00] dark:bg-[#0d0a06]">
+    <footer className="text-gray-300 dark:text-gray-400 bg-[var(--eth-footer-bg)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 lg:gap-8">
           {/* Brand */}
@@ -111,7 +111,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-6 pt-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs border-t border-white/10 text-amber-900/60 dark:text-amber-200/30">
+        <div className="mt-6 pt-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs border-t border-white/10 text-amber-200/40">
           <p>© {new Date().getFullYear()} {siteName}. All rights reserved.</p>
           <p>Built with Next.js, Node.js & MongoDB</p>
         </div>

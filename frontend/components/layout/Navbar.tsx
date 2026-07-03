@@ -153,7 +153,7 @@ export default function Navbar() {
                   <Button variant="ghost" size="icon" className={`rounded-full ${hasSolidHeader ? '' : 'hover:bg-white/10'}`}>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatar} />
-                      <AvatarFallback className="text-sm font-medium" style={{ background: '#f5e6c8', color: '#7a5c1e' }}>
+                      <AvatarFallback className="text-sm font-medium" style={{ background: 'var(--eth-gold-light)', color: 'var(--eth-gold-muted)' }}>
                         {user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
