@@ -139,11 +139,10 @@ app.get('/api/health', (req, res) => {
 // One-time admin setup — protected by SETUP_SECRET env var
 // Call: GET /api/setup-admin?secret=YOUR_SETUP_SECRET&password=YourPassword
 app.get('/api/setup-admin', async (req, res) => {
-  // Temporarily bypassed for setup
-  // const setupSecret = process.env.SETUP_SECRET;
-  // if (!setupSecret || req.query.secret !== setupSecret) {
-  //   return res.status(403).json({ success: false, message: 'Forbidden' });
-  // }
+  const setupSecret = process.env.SETUP_SECRET;
+  if (!setupSecret || req.query.secret !== setupSecret) {
+    return res.status(403).json({ success: false, message: 'Forbidden' });
+  }
   try {
     const User = require('./src/models/User');
     const adminEmail = 'kinfenati7@gmail.com';
