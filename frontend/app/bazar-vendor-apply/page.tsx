@@ -216,8 +216,11 @@ export default function BazarVendorApplyPage() {
   const closeAt = regStatus?.scheduledCloseAt ? new Date(regStatus.scheduledCloseAt) : null;
   const isBeforeOpen = openAt ? now < openAt : false;
   const isAfterClose = closeAt ? now > closeAt : false;
-  const inWindowByClient = (!openAt || now >= openAt) && (!closeAt || now <= closeAt);
-  const effectivelyOpen = regStatus ? (regStatus.isOpen || inWindowByClient) : false;
+  const hasSchedule = !!(openAt || closeAt);
+  const inWindowByClient = hasSchedule
+    ? (!openAt || now >= openAt) && (!closeAt || now <= closeAt)
+    : false;
+  const effectivelyOpen = regStatus ? (hasSchedule ? inWindowByClient : regStatus.isOpen) : false;
 
   const rulesToShow = (regStatus?.rules && regStatus.rules.length > 0 ? regStatus.rules : DEFAULT_BAZAR_RULES);
 

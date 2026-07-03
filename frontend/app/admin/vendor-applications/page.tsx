@@ -43,6 +43,14 @@ interface VendorApplication {
   rejectedAt?: string;
 }
 
+const formatLocalDateForInput = (dateString: string | null | undefined): string => {
+  if (!dateString) return '';
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  const pad = (num: number) => String(num).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 export default function AdminVendorApplicationsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -81,8 +89,8 @@ export default function AdminVendorApplicationsPage() {
       const res = await api.get('/admin/settings');
       const br = res.data.data?.bazarRegistration || {};
       setRegIsOpen(br.isOpen ?? false);
-      setRegScheduledOpenAt(br.scheduledOpenAt ? new Date(br.scheduledOpenAt).toISOString().slice(0, 16) : '');
-      setRegScheduledCloseAt(br.scheduledCloseAt ? new Date(br.scheduledCloseAt).toISOString().slice(0, 16) : '');
+      setRegScheduledOpenAt(formatLocalDateForInput(br.scheduledOpenAt));
+      setRegScheduledCloseAt(formatLocalDateForInput(br.scheduledCloseAt));
       setRegClosedMessage(br.closedMessage || 'Vendor registration is currently closed. Please check back later.');
       const tp = res.data.data?.bazarTablePricing || {};
       setFullTablePrice(tp.fullTablePrice !== undefined ? String(tp.fullTablePrice) : '');
@@ -431,26 +439,44 @@ export default function AdminVendorApplicationsPage() {
         ) : (
           <div className="space-y-4">
             {/* Manual toggle */}
-            <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Registration is currently{' '}
-                  <span className={regIsOpen ? 'text-emerald-600 font-semibold' : 'text-red-500 font-semibold'}>
-                    {regIsOpen ? 'OPEN' : 'CLOSED'}
-                  </span>
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {regIsOpen
-                    ? 'Vendors can submit applications right now.'
-                    : 'The registration form is hidden from vendors.'}
-                </p>
-              </div>
-              <Switch
-                checked={regIsOpen}
-                onCheckedChange={setRegIsOpen}
-                className="data-[state=checked]:bg-emerald-600"
-              />
-            </div>
+            {(() => {
+              const hasSchedule = !!(regScheduledOpenAt || regScheduledCloseAt);
+              const now = new Date();
+              const openAt = regScheduledOpenAt ? new Date(regScheduledOpenAt) : null;
+              const closeAt = regScheduledCloseAt ? new Date(regScheduledCloseAt) : null;
+              const inWindow = hasSchedule
+                ? (!openAt || now >= openAt) && (!closeAt || now <= closeAt)
+                : false;
+              const isCurrentlyOpen = hasSchedule ? inWindow : regIsOpen;
+
+              return (
+                <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      Registration is currently{' '}
+                      <span className={isCurrentlyOpen ? 'text-emerald-600 font-semibold' : 'text-red-500 font-semibold'}>
+                        {isCurrentlyOpen ? 'OPEN' : 'CLOSED'}
+                      </span>
+                      {hasSchedule && (
+                        <span className="text-xs text-gray-400 font-normal ml-2">
+                          (determined by schedule)
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {isCurrentlyOpen
+                        ? 'Vendors can submit applications right now.'
+                        : 'The registration form is hidden from vendors.'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={regIsOpen}
+                    onCheckedChange={setRegIsOpen}
+                    className="data-[state=checked]:bg-emerald-600"
+                  />
+                </div>
+              );
+            })()}
 
             {/* Scheduled window */}
             <div className="grid sm:grid-cols-2 gap-3">

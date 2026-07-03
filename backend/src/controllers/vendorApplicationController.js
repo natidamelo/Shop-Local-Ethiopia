@@ -10,6 +10,24 @@ const {
 // Public endpoint to submit a new vendor/bazar application
 const createVendorApplication = async (req, res, next) => {
   try {
+    // Check if registration is currently open
+    const settings = await Settings.getSingleton();
+    const br = settings.bazarRegistration || {};
+    const now = new Date();
+    let isRegistrationOpen = br.isOpen || false;
+    if (br.scheduledOpenAt || br.scheduledCloseAt) {
+      const afterOpen = br.scheduledOpenAt ? now >= new Date(br.scheduledOpenAt) : true;
+      const beforeClose = br.scheduledCloseAt ? now <= new Date(br.scheduledCloseAt) : true;
+      isRegistrationOpen = afterOpen && beforeClose;
+    }
+
+    if (!isRegistrationOpen) {
+      return res.status(400).json({
+        success: false,
+        message: br.closedMessage || 'Vendor registration is currently closed. Please check back later.',
+      });
+    }
+
     const {
       vendorType,
       displayName,
