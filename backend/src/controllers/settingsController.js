@@ -31,6 +31,13 @@ const getSettings = async (req, res, next) => {
         welcomeCouponCode: settings.welcomeCouponCode || 'WELCOME10',
         welcomeDiscount: settings.welcomeDiscount || '10%',
         supportPages: settings.supportPages || {},
+        navLinks: settings.navLinks && settings.navLinks.length > 0 ? settings.navLinks : [
+          { href: '/shop', label: 'Shop' },
+          { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
+          { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
+          { href: '/shop?featured=true', label: 'Featured' },
+          { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
+        ],
       },
     });
   } catch (error) {
@@ -93,7 +100,7 @@ const getAdminSettings = async (req, res, next) => {
 // @PUT /api/admin/settings
 const updateSettings = async (req, res, next) => {
   try {
-    const { siteName, logoUrl, tagline, contactEmail, contactPhone, contactAddress, whyChooseHeading, whyChooseSubtitle, whyChooseFeatures, trustBadges, hero, testimonials, bazarRegistration, bazarTablePricing, bazarRules, welcomeCouponCode, welcomeDiscount, supportPages, bazarPosterUrl } = req.body;
+    const { siteName, logoUrl, tagline, contactEmail, contactPhone, contactAddress, whyChooseHeading, whyChooseSubtitle, whyChooseFeatures, trustBadges, hero, testimonials, bazarRegistration, bazarTablePricing, bazarRules, welcomeCouponCode, welcomeDiscount, supportPages, bazarPosterUrl, navLinks } = req.body;
     const settings = await Settings.getSingleton();
     if (siteName !== undefined) settings.siteName = siteName;
     if (logoUrl !== undefined) settings.logoUrl = logoUrl;
@@ -160,6 +167,15 @@ const updateSettings = async (req, res, next) => {
     }
     if (bazarPosterUrl !== undefined) {
       settings.bazarPosterUrl = String(bazarPosterUrl).trim();
+    }
+    if (navLinks !== undefined && Array.isArray(navLinks)) {
+      settings.navLinks = navLinks
+        .map((link) => ({
+          label: String(link.label || '').trim(),
+          href: String(link.href || '').trim(),
+        }))
+        .filter((link) => link.label && link.href);
+      settings.markModified('navLinks');
     }
     await settings.save();
     res.json({

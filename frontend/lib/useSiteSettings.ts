@@ -69,6 +69,11 @@ export interface SupportPages {
   terms?: SupportPageData;
 }
 
+export interface NavLink {
+  label: string;
+  href: string;
+}
+
 export type CurrencyCode = 'USD' | 'ETB';
 
 export interface WhyChooseFeature {
@@ -95,6 +100,7 @@ export interface SiteSettings {
   /** Display text for the discount e.g. "10%" or "ETB 500" */
   welcomeDiscount: string;
   supportPages: SupportPages;
+  navLinks: NavLink[];
 }
 
 /** Format a price for display. Use currency from useSiteSettings() or pass explicitly. */
@@ -174,6 +180,13 @@ const defaults: SiteSettings = {
     { title: 'Global Reach', desc: 'Multi-currency shopping from anywhere in the world.' },
     { title: 'Instant Digital', desc: 'Instant delivery for courses, downloads & software.' },
   ],
+  navLinks: [
+    { href: '/shop', label: 'Shop' },
+    { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
+    { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
+    { href: '/shop?featured=true', label: 'Featured' },
+    { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
+  ],
 };
 
 export function useSiteSettings() {
@@ -234,6 +247,9 @@ export function useSiteSettings() {
     welcomeCouponCode: data?.welcomeCouponCode ?? defaults.welcomeCouponCode,
     welcomeDiscount: data?.welcomeDiscount ?? defaults.welcomeDiscount,
     supportPages: (data?.supportPages ?? {}) as SupportPages,
+    navLinks: Array.isArray(data?.navLinks) && data.navLinks.length > 0
+      ? data.navLinks
+      : defaults.navLinks,
     isLoading,
   };
 }

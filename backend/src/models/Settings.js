@@ -33,11 +33,29 @@ const testimonialSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const navLinkSchema = new mongoose.Schema(
+  {
+    label: { type: String, required: true },
+    href: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const settingsSchema = new mongoose.Schema(
   {
     siteName: { type: String, default: 'Shop Local Ethiopia' },
     logoUrl: { type: String, default: '' },
     tagline: { type: String, default: '' },
+    navLinks: {
+      type: [navLinkSchema],
+      default: [
+        { href: '/shop', label: 'Shop' },
+        { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
+        { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
+        { href: '/shop?featured=true', label: 'Featured' },
+        { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
+      ],
+    },
 
     // Footer contact (shown on every page)
     contactEmail: { type: String, default: 'support@shopLocal.com' },

@@ -21,7 +21,7 @@ import { useCartStore } from '@/lib/store/cartStore';
 import { useSiteSettings } from '@/lib/useSiteSettings';
 import { toast } from 'sonner';
 
-const navLinks = [
+const defaultNavLinks = [
   { href: '/shop', label: 'Shop' },
   { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
   { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
@@ -40,7 +40,7 @@ export default function Navbar() {
   const itemCount = useCartStore((s) => s.getItemCount());
   const router = useRouter();
   const pathname = usePathname();
-  const { siteName, logoUrl } = useSiteSettings();
+  const { siteName, logoUrl, navLinks = defaultNavLinks } = useSiteSettings();
 
   // Use solid header (cream bg + dark text) when scrolled OR on any page other than homepage (dashboard, shop, etc. have light backgrounds)
   const hasSolidHeader = scrolled || (pathname !== '/' && pathname !== '');

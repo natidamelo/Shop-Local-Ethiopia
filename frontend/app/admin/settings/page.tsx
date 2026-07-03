@@ -42,6 +42,7 @@ export default function AdminSettingsPage() {
     welcomeCouponCode: 'WELCOME10',
     welcomeDiscount: '10%',
     bazarRules: defaultBazarRules,
+    navLinks: [] as { label: string; href: string }[],
   });
   const [loading, setLoading] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -59,6 +60,16 @@ export default function AdminSettingsPage() {
       const rules = Array.isArray(d.bazarRules) && d.bazarRules.length
         ? d.bazarRules
         : defaultBazarRules;
+      const defaultNavLinks = [
+        { href: '/shop', label: 'Shop' },
+        { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
+        { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
+        { href: '/shop?featured=true', label: 'Featured' },
+        { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
+      ];
+      const navLinks = Array.isArray(d.navLinks) && d.navLinks.length
+        ? d.navLinks
+        : defaultNavLinks;
       setForm({
         siteName: d.siteName || 'Shop Local Ethiopia',
         logoUrl: d.logoUrl || '',
@@ -73,6 +84,7 @@ export default function AdminSettingsPage() {
         welcomeCouponCode: d.welcomeCouponCode || 'WELCOME10',
         welcomeDiscount: d.welcomeDiscount || '10%',
         bazarRules: rules,
+        navLinks,
       });
       if (d.logoUrl) setLogoPreview(d.logoUrl);
     }).catch(() => {});
@@ -114,6 +126,7 @@ export default function AdminSettingsPage() {
         welcomeCouponCode: form.welcomeCouponCode,
         welcomeDiscount: form.welcomeDiscount,
         bazarRules: form.bazarRules,
+        navLinks: form.navLinks,
       });
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       toast.success('Site settings saved!');
@@ -378,6 +391,72 @@ export default function AdminSettingsPage() {
             <p className="text-amber-700 dark:text-amber-400 text-xs mt-0.5">
               Code revealed after email: <strong className="font-mono">{form.welcomeCouponCode || 'WELCOME10'}</strong>
             </p>
+          </div>
+        </div>
+
+        {/* Navigation Menu Links */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm space-y-4">
+          <h2 className="font-semibold text-gray-900 dark:text-white">Navigation menu links</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Customize the main links that appear in your header and mobile navigation.
+          </p>
+          <div className="space-y-3">
+            {form.navLinks.map((link, index) => (
+              <div key={index} className="flex gap-2 items-end p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <div className="flex-1 space-y-1">
+                  <Label>Link label</Label>
+                  <Input
+                    value={link.label}
+                    onChange={(e) =>
+                      setForm((p) => ({
+                        ...p,
+                        navLinks: p.navLinks.map((l, i) => (i === index ? { ...l, label: e.target.value } : l)),
+                      }))
+                    }
+                    placeholder="e.g. Shop"
+                  />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <Label>Link URL/Path</Label>
+                  <Input
+                    value={link.href}
+                    onChange={(e) =>
+                      setForm((p) => ({
+                        ...p,
+                        navLinks: p.navLinks.map((l, i) => (i === index ? { ...l, href: e.target.value } : l)),
+                      }))
+                    }
+                    placeholder="e.g. /shop"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() =>
+                    setForm((p) => ({
+                      ...p,
+                      navLinks: p.navLinks.filter((_, i) => i !== index),
+                    }))
+                  }
+                  className="text-red-500 hover:text-red-700 p-2 shrink-0"
+                >
+                  Delete
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                setForm((p) => ({
+                  ...p,
+                  navLinks: [...p.navLinks, { label: '', href: '' }],
+                }))
+              }
+              className="w-full border-dashed"
+            >
+              + Add new link
+            </Button>
           </div>
         </div>
 
