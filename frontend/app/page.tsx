@@ -309,44 +309,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEATURE ICONS BAR ────────────────────────────────────────── */}
-      <section style={{ background: 'var(--eth-warm)', borderBottom: '1px solid var(--eth-border)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: Truck,          label: 'Free Delivery',       desc: 'On orders over ETB 5,000' },
-              { icon: RefreshCw,      label: 'Return Guarantee',    desc: '30-day hassle-free returns' },
-              { icon: HeadphonesIcon, label: '24/7 Support',        desc: 'Round the clock assistance' },
-              { icon: Globe,          label: 'Worldwide Delivery',  desc: 'Ship anywhere globally' },
-            ].map((f, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--eth-icon-bg)' }}>
-                  <f.icon className="w-5 h-5" style={{ color: 'var(--eth-gold)' }} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold" style={{ color: 'var(--eth-text-primary)' }}>{f.label}</p>
-                  <p className="text-xs" style={{ color: 'var(--eth-text-muted)' }}>{f.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section style={{ background: 'var(--navy-700)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((s, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="text-center">
-                <div className="text-4xl font-extrabold" style={{ color: 'var(--gold-500)' }}>{s.value}</div>
-                <div className="text-sm mt-1 font-medium" style={{ color: 'var(--white)', opacity: 0.85 }}>{s.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── CATEGORIES ───────────────────────────────────────────────── */}
       <section className="py-20" style={{ background: 'var(--eth-section-bg)' }}>
@@ -489,6 +452,45 @@ export default function HomePage() {
                 See All Products <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURE ICONS BAR ────────────────────────────────────────── */}
+      <section style={{ background: 'var(--eth-warm)', borderBottom: '1px solid var(--eth-border)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { icon: Truck,          label: 'Free Delivery',       desc: 'On orders over ETB 5,000' },
+              { icon: RefreshCw,      label: 'Return Guarantee',    desc: '30-day hassle-free returns' },
+              { icon: HeadphonesIcon, label: '24/7 Support',        desc: 'Round the clock assistance' },
+              { icon: Globe,          label: 'Worldwide Delivery',  desc: 'Ship anywhere globally' },
+            ].map((f, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--eth-icon-bg)' }}>
+                  <f.icon className="w-5 h-5" style={{ color: 'var(--eth-gold)' }} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: 'var(--eth-text-primary)' }}>{f.label}</p>
+                  <p className="text-xs" style={{ color: 'var(--eth-text-muted)' }}>{f.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ background: 'var(--navy-700)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((s, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="text-center">
+                <div className="text-4xl font-extrabold" style={{ color: 'var(--gold-500)' }}>{s.value}</div>
+                <div className="text-sm mt-1 font-medium" style={{ color: 'var(--white)', opacity: 0.85 }}>{s.label}</div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
