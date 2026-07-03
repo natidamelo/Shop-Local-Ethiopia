@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { CalendarClock, CheckCircle2, Clock, DollarSign, Store, XCircle, Image as ImageIcon } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { rewriteAssetUrl } from '@/lib/rewriteAssetUrl';
 
 type VendorStatus = 'pending' | 'approved' | 'rejected';
 
@@ -401,7 +402,7 @@ export default function AdminVendorApplicationsPage() {
             <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-2 flex items-center justify-center">
               {bazarPosterUrl ? (
                 <img
-                  src={bazarPosterUrl}
+                  src={rewriteAssetUrl(bazarPosterUrl)}
                   alt="Bazar poster preview"
                   className="max-h-40 w-full object-contain rounded-lg"
                 />
@@ -684,7 +685,7 @@ export default function AdminVendorApplicationsPage() {
                       {selected.photoLinks.map((link, i) => (
                         <a
                           key={i}
-                          href={link}
+                          href={rewriteAssetUrl(link)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-[11px] px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-amber-700 hover:underline"
@@ -701,7 +702,7 @@ export default function AdminVendorApplicationsPage() {
                     <Label className="text-xs text-gray-500">Media / social</Label>
                     {selected.videoLink && (
                       <a
-                        href={selected.videoLink}
+                        href={rewriteAssetUrl(selected.videoLink)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block text-[11px] text-amber-700 hover:underline"

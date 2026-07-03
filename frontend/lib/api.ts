@@ -15,11 +15,41 @@ const api = axios.create({
 });
 
 // Request interceptor - attach access token
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
+    let token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(window.atob(parts[1]));
+          // Expired or expiring within 10 seconds
+          const isExpired = payload.exp * 1000 - 10000 < Date.now();
+          if (isExpired) {
+            try {
+              const res = await axios.post(`${getApiBaseUrl()}/auth/refresh`, {}, { withCredentials: true });
+              const newToken = res.data.data.accessToken;
+              localStorage.setItem('accessToken', newToken);
+              token = newToken;
+              const { useAuthStore } = await import('./store/authStore');
+              useAuthStore.setState({ accessToken: newToken, isAuthenticated: true });
+            } catch {
+              // Refresh failed - clear credentials
+              localStorage.removeItem('accessToken');
+              token = null;
+              const { useAuthStore } = await import('./store/authStore');
+              useAuthStore.setState({ user: null, accessToken: null, isAuthenticated: false });
+            }
+          }
+        }
+      } catch (e) {
+        // failed to parse - try using the token as-is
+      }
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        delete config.headers.Authorization;
+      }
     }
   }
   // Don't set Content-Type for FormData - let axios set it with boundary

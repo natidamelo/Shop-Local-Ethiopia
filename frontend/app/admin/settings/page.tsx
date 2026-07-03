@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { rewriteAssetUrl } from '@/lib/rewriteAssetUrl';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -173,7 +174,7 @@ export default function AdminSettingsPage() {
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-700/50">
                 {logoPreview ? (
-                  <img src={logoPreview} alt="Logo" className="w-full h-full object-contain" />
+                  <img src={rewriteAssetUrl(logoPreview)} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
                   <ImageIcon className="w-10 h-10 text-gray-400" />
                 )}

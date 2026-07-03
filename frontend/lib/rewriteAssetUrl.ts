@@ -13,7 +13,15 @@
 export function rewriteAssetUrl(url: string | undefined): string {
   if (!url) return '';
 
-  // Already a relative path — nothing to rewrite
+  // Blob URL — nothing to rewrite
+  if (url.startsWith('blob:')) return url;
+
+  // Starts with 'uploads/' (relative path without leading slash) — prepend a leading slash
+  if (url.startsWith('uploads/')) {
+    return '/' + url;
+  }
+
+  // Already a relative path starting with slash — nothing to rewrite
   if (url.startsWith('/')) return url;
 
   // Absolute URL — extract the pathname so the Next.js proxy handles it
@@ -26,6 +34,15 @@ export function rewriteAssetUrl(url: string | undefined): string {
       }
     } catch {
       // malformed URL — fall through
+    }
+    return url;
+  }
+
+  // Plain filename without slashes (e.g. xxx.jpg) — prepend /uploads/
+  if (!url.includes('/')) {
+    const hasExtension = /\.[a-zA-Z0-9]+$/.test(url);
+    if (hasExtension) {
+      return '/uploads/' + url;
     }
   }
 

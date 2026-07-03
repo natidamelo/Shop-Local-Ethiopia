@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store/authStore';
 import { toast } from 'sonner';
+import { rewriteAssetUrl } from '@/lib/rewriteAssetUrl';
 
 type VendorType = 'enterprise' | 'individual';
 type TableType = 'full' | 'half';
@@ -338,7 +339,7 @@ export default function BazarVendorApplyPage() {
                 {regStatus?.posterUrl && (
                   <div className="mt-6 rounded-xl overflow-hidden border border-amber-600/40 bg-amber-900/40">
                     <img
-                      src={regStatus.posterUrl}
+                      src={rewriteAssetUrl(regStatus.posterUrl)}
                       alt="Bazar poster"
                       className="w-full h-auto object-cover"
                     />
