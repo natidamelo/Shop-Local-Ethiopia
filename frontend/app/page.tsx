@@ -327,14 +327,14 @@ export default function HomePage() {
       </section>
 
       {/* ── STATS BAR ────────────────────────────────────────────────── */}
-      <section style={{ background: ETH_GOLD }}>
+      <section style={{ background: 'var(--eth-footer-bg)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="text-center">
                 <div className="text-4xl font-extrabold text-white">{s.value}</div>
-                <div className="text-sm mt-1 font-medium" style={{ color: '#f5e6c8' }}>{s.label}</div>
+                <div className="text-sm mt-1 font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.label}</div>
               </motion.div>
             ))}
           </div>
