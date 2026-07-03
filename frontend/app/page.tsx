@@ -333,7 +333,7 @@ export default function HomePage() {
             {stats.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="text-center">
-                <div className="text-4xl font-extrabold text-white">{s.value}</div>
+                <div className="text-4xl font-extrabold" style={{ color: 'var(--eth-gold)' }}>{s.value}</div>
                 <div className="text-sm mt-1 font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.label}</div>
               </motion.div>
             ))}
