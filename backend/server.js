@@ -34,6 +34,9 @@ const { errorHandler, notFound } = require('./src/middleware/errorHandler');
 
 const app = express();
 
+// Trust proxy for rate limiting behind reverse proxies (Render, Vercel, etc.)
+app.set('trust proxy', 1);
+
 // Connect to database
 connectDB();
 
@@ -103,13 +106,13 @@ if (process.env.NODE_ENV === 'development') {
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 2000 : 100,
+  max: process.env.NODE_ENV === 'development' ? 10000 : 1500, // Higher limits for normal user browsing sessions
   message: { success: false, message: 'Too many requests, please try again later.' },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 200 : 50,
+  max: process.env.NODE_ENV === 'development' ? 1000 : 150, // Higher limits for auth requests
   message: { success: false, message: 'Too many auth attempts, please try again later.' },
   skipSuccessfulRequests: true, // Don't count successful logins against the limit
 });
