@@ -101,7 +101,81 @@ export interface SiteSettings {
   welcomeDiscount: string;
   supportPages: SupportPages;
   navLinks: NavLink[];
+  whyChooseUsPage: WhyChooseUsPageSettings;
 }
+
+export interface WhyChooseUsMissionItem {
+  title: string;
+  desc: string;
+}
+
+export interface WhyChooseUsStep {
+  step: string;
+  title: string;
+  desc: string;
+}
+
+export interface WhyChooseUsPromise {
+  icon: string;
+  title: string;
+  desc: string;
+}
+
+export interface WhyChooseUsPageSettings {
+  heritageBadgeText: string;
+  title: string;
+  subtitle: string;
+  ourStoryTitle: string;
+  ourStoryParagraphs: string[];
+  missionTitle: string;
+  missionItems: WhyChooseUsMissionItem[];
+  loomImageUrl: string;
+  loomImageCaption: string;
+  craftsmanshipBadgeText: string;
+  craftsmanshipTitle: string;
+  craftsmanshipDesc: string;
+  craftsmanshipSteps: WhyChooseUsStep[];
+  promiseTitle: string;
+  promiseSubtitle: string;
+  promiseItems: WhyChooseUsPromise[];
+}
+
+const whyChooseUsPageDefaults: WhyChooseUsPageSettings = {
+  heritageBadgeText: 'Our Heritage & Values',
+  title: 'Why Choose',
+  subtitle: 'We connect local Ethiopian artisans with the global marketplace, preserving centuries-old traditions and offering you authentic, high-quality handmade products.',
+  ourStoryTitle: 'Our Story: Preserving Culture & Craft',
+  ourStoryParagraphs: [
+    'Every basket, jewelry piece, and woven garment on our platform tells a story that dates back generations. In the fast-paced world of mass production, local Ethiopian artisans keep the spirit of handmade creation alive.',
+    'Shop Local Ethiopia was founded to bridge the gap between rural master craftsmen and buyers who appreciate unique, high-quality products. By purchasing from us, you directly support local communities, providing sustainable incomes for weavers, potters, and designers across the country.',
+    'We are dedicated to fair-trade principles. Our partnership guarantees that the artisans who create these masterpieces are paid fairly and treated with the respect their incredible skills deserve.'
+  ],
+  missionTitle: 'Our Core Mission',
+  missionItems: [
+    { title: 'Authenticity Guarantee', desc: '100% genuine cultural items direct from the source.' },
+    { title: 'Empowering Communities', desc: 'Providing sustainable livelihood for local rural artisans.' },
+    { title: 'Preserving Heritage', desc: 'Keeping age-old Ethiopian handcraft techniques alive.' }
+  ],
+  loomImageUrl: '/how-product-made.png',
+  loomImageCaption: 'An artisan hand-weaving traditional Ethiopian cotton fabric on a wooden loom.',
+  craftsmanshipBadgeText: 'Traditional Craftsmanship',
+  craftsmanshipTitle: 'How Our Products Are Made',
+  craftsmanshipDesc: 'Our textiles, like the traditional Habesha Kemis, are made using hand-spun local cotton. Master weavers (known locally as Shemane) spend days on wooden handlooms, weaving the threads into fine garments.',
+  craftsmanshipSteps: [
+    { step: '1', title: 'Spinning Raw Cotton', desc: 'Raw, organic cotton is cleaned and spun by hand into delicate threads.' },
+    { step: '2', title: 'Natural Dyeing', desc: 'Threads are dyed using natural extracts from flowers, roots, and leaves.' },
+    { step: '3', title: 'Handloom Weaving', desc: 'Using a traditional wooden loom, the weaver manually intertwines the patterns (Tibeb).' },
+    { step: '4', title: 'Intricate Finishing', desc: 'Garments are finished with hand-embroidery and final detail inspections.' }
+  ],
+  promiseTitle: 'Our Promise to You',
+  promiseSubtitle: 'We build trust through high-quality materials, secure transactions, and a seamless shopping experience.',
+  promiseItems: [
+    { icon: 'Shield', title: 'Secure Local Payments', desc: 'Shop easily with Telebirr, CBE Birr, Chapa, Stripe, or PayPal.' },
+    { icon: 'Truck', title: 'Reliable Shipping', desc: 'Same-day delivery in Addis Ababa, and global DHL shipping.' },
+    { icon: 'Heart', title: 'Community Support', desc: 'Over 80% of every sale goes directly to the creating artisan.' },
+    { icon: 'Users', title: '24/7 Dedicated Support', desc: 'Our customer support team is always ready to assist you.' }
+  ]
+};
 
 /** Format a price for display. Use currency from useSiteSettings() or pass explicitly. */
 export function formatPrice(amount: number | undefined | null, currency: CurrencyCode = 'ETB'): string {
@@ -187,6 +261,7 @@ const defaults: SiteSettings = {
     { href: '/shop?featured=true', label: 'Featured' },
     { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
   ],
+  whyChooseUsPage: whyChooseUsPageDefaults,
 };
 
 export function useSiteSettings() {
@@ -227,6 +302,11 @@ export function useSiteSettings() {
     ? [data.trustBadges[0], data.trustBadges[1], data.trustBadges[2]]
     : defaultTrustBadges;
 
+  const whyChooseUsPageRaw: WhyChooseUsPageSettings = {
+    ...whyChooseUsPageDefaults,
+    ...(data?.whyChooseUsPage || {}),
+  };
+
   return {
     siteName: data?.siteName ?? defaults.siteName,
     logoUrl: rewriteAssetUrl(data?.logoUrl ?? defaults.logoUrl),
@@ -250,6 +330,10 @@ export function useSiteSettings() {
     navLinks: Array.isArray(data?.navLinks) && data.navLinks.length > 0
       ? data.navLinks
       : defaults.navLinks,
+    whyChooseUsPage: {
+      ...whyChooseUsPageRaw,
+      loomImageUrl: rewriteAssetUrl(whyChooseUsPageRaw.loomImageUrl),
+    },
     isLoading,
   };
 }

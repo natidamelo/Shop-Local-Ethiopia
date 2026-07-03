@@ -38,6 +38,7 @@ const getSettings = async (req, res, next) => {
           { href: '/shop?featured=true', label: 'Featured' },
           { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
         ],
+        whyChooseUsPage: settings.whyChooseUsPage || {},
       },
     });
   } catch (error) {
@@ -100,7 +101,7 @@ const getAdminSettings = async (req, res, next) => {
 // @PUT /api/admin/settings
 const updateSettings = async (req, res, next) => {
   try {
-    const { siteName, logoUrl, tagline, contactEmail, contactPhone, contactAddress, whyChooseHeading, whyChooseSubtitle, whyChooseFeatures, trustBadges, hero, testimonials, bazarRegistration, bazarTablePricing, bazarRules, welcomeCouponCode, welcomeDiscount, supportPages, bazarPosterUrl, navLinks } = req.body;
+    const { siteName, logoUrl, tagline, contactEmail, contactPhone, contactAddress, whyChooseHeading, whyChooseSubtitle, whyChooseFeatures, trustBadges, hero, testimonials, bazarRegistration, bazarTablePricing, bazarRules, welcomeCouponCode, welcomeDiscount, supportPages, bazarPosterUrl, navLinks, whyChooseUsPage } = req.body;
     const settings = await Settings.getSingleton();
     if (siteName !== undefined) settings.siteName = siteName;
     if (logoUrl !== undefined) settings.logoUrl = logoUrl;
@@ -167,6 +168,11 @@ const updateSettings = async (req, res, next) => {
     }
     if (bazarPosterUrl !== undefined) {
       settings.bazarPosterUrl = String(bazarPosterUrl).trim();
+    }
+    if (whyChooseUsPage !== undefined && typeof whyChooseUsPage === 'object') {
+      const current = settings.whyChooseUsPage?.toObject?.() || {};
+      settings.whyChooseUsPage = { ...current, ...whyChooseUsPage };
+      settings.markModified('whyChooseUsPage');
     }
     if (navLinks !== undefined && Array.isArray(navLinks)) {
       settings.navLinks = navLinks
