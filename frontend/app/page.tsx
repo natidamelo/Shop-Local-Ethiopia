@@ -130,11 +130,11 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── HERO BANNER ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-16" style={{ background: '#1e40af' }}>
+      <section className="relative overflow-hidden pt-16" style={{ background: 'var(--navy-800)' }}>
         {/* Flag stripe */}
         <div className="h-1 w-full flex">
           <div className="flex-1" style={{ background: ETH_GREEN }} />
-          <div className="flex-1" style={{ background: ETH_GOLD }} />
+          <div className="flex-1" style={{ background: 'var(--gold-500)' }} />
           <div className="flex-1" style={{ background: ETH_RED }} />
         </div>
 
@@ -149,7 +149,7 @@ export default function HomePage() {
               muted={hero.heroVideoMuted ?? true}
               playsInline
             />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #1e40af 0%, #1e40afee 40%, #1e40af99 60%, transparent 75%)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, var(--navy-800) 0%, rgba(22, 41, 77, 0.93) 40%, rgba(22, 41, 77, 0.6) 60%, transparent 75%)' }} />
           </div>
         )}
 
@@ -167,13 +167,13 @@ export default function HomePage() {
                 transformOrigin: 'center center',
               }}
             />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #1e40af 0%, #1e40afee 40%, #1e40af99 60%, transparent 75%)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, var(--navy-800) 0%, rgba(22, 41, 77, 0.93) 40%, rgba(22, 41, 77, 0.6) 60%, transparent 75%)' }} />
           </div>
         )}
 
         {/* Diagonal accent */}
         {!(hero.heroMediaType === 'video' ? hero.heroVideoUrl : hero.heroImageUrl) && (
-          <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(155deg, #1e40af 55%, ${ETH_GOLD}22 55%, ${ETH_GOLD}11 100%)` }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(155deg, var(--navy-800) 55%, rgba(212, 162, 76, 0.15) 55%, rgba(212, 162, 76, 0.05) 100%)` }} />
         )}
 
         {/* Pattern overlay */}
@@ -188,12 +188,12 @@ export default function HomePage() {
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2">
                 {hero.badge1 && (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(184,134,11,0.2)', color: ETH_GOLD, border: '1px solid rgba(184,134,11,0.35)' }}>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(212,162,76,0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212,162,76,0.3)' }}>
                     <MapPin className="w-3 h-3" /> {hero.badge1}
                   </span>
                 )}
                 {hero.badge2 && (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(45,106,45,0.2)', color: '#7dcc7d', border: '1px solid rgba(45,106,45,0.35)' }}>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(212,162,76,0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212,162,76,0.3)' }}>
                     {hero.badge2}
                   </span>
                 )}
@@ -203,21 +203,19 @@ export default function HomePage() {
               <div>
                 <h1 className="font-extrabold leading-[1.08] tracking-tight text-white" style={{ fontSize: 'clamp(2.6rem,5.5vw,4.5rem)' }}>
                   {hero.headlineLine1}<br />
-                  <span style={{ color: ETH_GOLD }}>{hero.headlineLine2}</span>{' '}
+                  <span style={{ color: 'var(--gold-500)' }}>{hero.headlineLine2}</span>{' '}
                   {(() => {
                     const words = hero.headlineLine3.split(' ');
-                    if (words.length <= 1) return <span style={{ color: ETH_GOLD }}>{hero.headlineLine3}</span>;
-                    return <><span className="text-white">{words.slice(0, -1).join(' ')}</span>{' '}<span style={{ color: ETH_GOLD }}>{words[words.length - 1]}</span></>;
+                    if (words.length <= 1) return <span style={{ color: 'var(--gold-500)' }}>{hero.headlineLine3}</span>;
+                    return <><span className="text-[var(--white)]">{words.slice(0, -1).join(' ')}</span>{' '}<span style={{ color: 'var(--gold-500)' }}>{words[words.length - 1]}</span></>;
                   })()}
                 </h1>
-                <div className="mt-4 flex gap-1.5">
-                  <div className="h-1 w-16 rounded-full" style={{ background: ETH_GOLD }} />
-                  <div className="h-1 w-8 rounded-full" style={{ background: ETH_GREEN }} />
-                  <div className="h-1 w-4 rounded-full" style={{ background: ETH_RED }} />
+                <div className="mt-4">
+                  <div className="h-1 w-24 rounded-full" style={{ background: 'var(--gold-500)' }} />
                 </div>
               </div>
 
-              <p className="text-base lg:text-lg leading-relaxed max-w-lg" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              <p className="text-base lg:text-lg leading-relaxed max-w-lg" style={{ color: 'var(--white)', opacity: 0.85 }}>
                 {hero.description}
               </p>
 
@@ -225,11 +223,16 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4">
                 {hero.buttons.map((btn, idx) => (
                   <Link key={idx} href={btn.link || '#'}>
-                    <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    <motion.button
+                      whileHover={{
+                        scale: 1.03,
+                        backgroundColor: btn.style === 'primary' ? 'var(--gold-600)' : 'rgba(44, 74, 124, 0.15)'
+                      }}
+                      whileTap={{ scale: 0.97 }}
                       className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-bold transition-all"
                       style={btn.style === 'primary'
-                        ? { background: ETH_GOLD, color: '#fff', borderRadius: '6px', boxShadow: '0 4px 24px rgba(184,134,11,0.4)' }
-                        : { background: 'transparent', border: '2px solid rgba(255,255,255,0.35)', color: '#fff', borderRadius: '6px' }
+                        ? { background: 'var(--gold-500)', color: 'var(--white)', borderRadius: '6px', boxShadow: '0 4px 24px rgba(212, 162, 76, 0.3)' }
+                        : { background: 'transparent', border: '2px solid var(--navy-600)', color: 'var(--white)', borderRadius: '6px' }
                       }>
                       {btn.style === 'primary' && <ShoppingBag className="w-5 h-5" />}
                       {btn.text}
@@ -243,8 +246,8 @@ export default function HomePage() {
               <div className="flex items-center gap-4 pt-2">
                 <div className="flex -space-x-2">
                   {['A','B','C','D'].map((l, i) => (
-                    <div key={i} className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold"
-                      style={{ borderColor: '#1e40af', background: i % 2 === 0 ? ETH_GOLD : ETH_GREEN }}>
+                    <div key={i} className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-[var(--white)] text-xs font-bold"
+                      style={{ borderColor: 'var(--navy-800)', background: i % 2 === 0 ? 'var(--gold-500)' : 'var(--navy-600)' }}>
                       {l}
                     </div>
                   ))}
@@ -253,7 +256,7 @@ export default function HomePage() {
                   <div className="flex gap-0.5">
                     {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                   </div>
-                  <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{hero.socialProofText}</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--white)', opacity: 0.6 }}>{hero.socialProofText}</p>
                 </div>
               </div>
             </motion.div>
@@ -289,10 +292,15 @@ export default function HomePage() {
                   />
                 </div>
               ) : (
-                <div className="w-full max-w-lg rounded-xl flex items-center justify-center max-h-[260px] lg:max-h-[380px]" style={{ aspectRatio: '3/4', background: 'rgba(184,134,11,0.08)', border: '2px dashed rgba(184,134,11,0.2)' }}>
-                  <div className="text-center space-y-3 px-8">
-                    <div className="text-6xl">☕ 🧺 📿</div>
-                    <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.25)' }}>Upload a hero image or video<br />in Admin &rarr; Hero Page</p>
+                <div className="relative overflow-hidden rounded-xl w-full max-h-[260px] lg:max-h-[380px]" style={{ aspectRatio: '3/4' }}>
+                  <div className="absolute -inset-3 rounded-2xl rotate-2 opacity-20 hidden lg:block" style={{ background: 'var(--gold-500)' }} />
+                  <img
+                    src="/how-product-made.png"
+                    alt="Authentic Ethiopian Handcraft"
+                    className="relative rounded-xl shadow-2xl w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex items-end p-4">
+                    <p className="text-xs text-white/90 italic">Authentic hand-woven textiles & apparel</p>
                   </div>
                 </div>
               )}
@@ -326,15 +334,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── STATS BAR ────────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--eth-footer-bg)' }}>
+      <section style={{ background: 'var(--navy-700)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="text-center">
-                <div className="text-4xl font-extrabold" style={{ color: 'var(--eth-gold)' }}>{s.value}</div>
-                <div className="text-sm mt-1 font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.label}</div>
+                <div className="text-4xl font-extrabold" style={{ color: 'var(--gold-500)' }}>{s.value}</div>
+                <div className="text-sm mt-1 font-medium" style={{ color: 'var(--white)', opacity: 0.85 }}>{s.label}</div>
               </motion.div>
             ))}
           </div>
@@ -348,11 +355,11 @@ export default function HomePage() {
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--eth-text-muted)' }}>Browse by Category</p>
             <div className="flex items-end justify-between">
               <h2 className="text-3xl font-extrabold" style={{ color: 'var(--eth-text-primary)' }}>Shop by Category</h2>
-              <Link href="/shop" className="text-sm font-semibold flex items-center gap-1 hover:underline" style={{ color: 'var(--eth-gold)' }}>
+              <Link href="/shop" className="text-sm font-semibold flex items-center gap-1 hover:underline" style={{ color: 'var(--navy-800)' }}>
                 View all <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="mt-3 h-0.5 w-16" style={{ background: 'var(--eth-gold)' }} />
+            <div className="mt-3 h-0.5 w-16" style={{ background: 'var(--gold-500)' }} />
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -389,14 +396,14 @@ export default function HomePage() {
         <div className="w-full px-6 sm:px-10 lg:px-16">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: 'var(--eth-gold)', letterSpacing: '0.15em' }}>
+              <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: 'var(--navy-600)', letterSpacing: '0.15em' }}>
                 Featured Collection
               </p>
               <h2 className="text-3xl font-light" style={{ color: 'var(--eth-text-primary)', letterSpacing: '-0.02em' }}>Handpicked for You</h2>
               <p className="mt-1.5 text-sm" style={{ color: 'var(--eth-text-muted)' }}>Authentic cultural items crafted by local artisans</p>
-              <div className="mt-3 h-px w-12" style={{ background: 'var(--eth-gold)' }} />
+              <div className="mt-3 h-px w-12" style={{ background: 'var(--navy-600)' }} />
             </div>
-            <Link href="/shop" className="hidden md:flex items-center gap-1 text-sm hover:underline" style={{ color: 'var(--eth-gold)' }}>
+            <Link href="/shop" className="hidden md:flex items-center gap-1 text-sm hover:underline" style={{ color: 'var(--navy-800)' }}>
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
@@ -534,8 +541,8 @@ export default function HomePage() {
                 </div>
                 <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--eth-text-secondary)' }}>&quot;{t.text}&quot;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                    style={{ background: i % 2 === 0 ? 'var(--eth-gold)' : 'var(--eth-green)' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--white)] text-sm font-bold flex-shrink-0"
+                    style={{ background: i % 2 === 0 ? 'var(--gold-500)' : 'var(--navy-800)' }}>
                     {(t.avatar || t.name?.charAt(0) || '?').toUpperCase()}
                   </div>
                   <div>
@@ -565,11 +572,11 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA BANNER ───────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden" style={{ background: '#0b1e42' }}>
+      <section className="relative overflow-hidden" style={{ background: '#050c1a' }}>
         {/* Ethiopian flag accent stripe */}
         <div className="h-1 w-full flex">
           <div className="flex-1" style={{ background: ETH_GREEN }} />
-          <div className="flex-1" style={{ background: ETH_GOLD }} />
+          <div className="flex-1" style={{ background: 'var(--gold-500)' }} />
           <div className="flex-1" style={{ background: ETH_RED }} />
         </div>
 
@@ -580,7 +587,7 @@ export default function HomePage() {
             alt="Ethiopian cultural market"
             className="absolute inset-0 w-full h-full object-cover opacity-25"
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, #0b1e42 50%, transparent 100%)' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, var(--navy-800) 50%, transparent 100%)' }} />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -592,18 +599,16 @@ export default function HomePage() {
                 className="flex-1 space-y-4"
               >
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest"
-                  style={{ background: 'rgba(184,134,11,0.18)', color: ETH_GOLD, border: '1px solid rgba(184,134,11,0.35)' }}>
+                  style={{ background: 'rgba(212, 162, 76, 0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212, 162, 76, 0.3)' }}>
                   <MapPin className="w-3 h-3" /> Made in Ethiopia
                 </span>
                 <h2 className="text-3xl lg:text-4xl font-extrabold leading-tight text-white whitespace-pre-line">
                   {hero.ctaBannerTitle.replace(/\\n/g, '\n')}
                 </h2>
-                <div className="flex gap-1.5">
-                  <div className="h-0.5 w-12 rounded-full" style={{ background: ETH_GOLD }} />
-                  <div className="h-0.5 w-6 rounded-full" style={{ background: ETH_GREEN }} />
-                  <div className="h-0.5 w-3 rounded-full" style={{ background: ETH_RED }} />
+                <div className="flex">
+                  <div className="h-0.5 w-16 rounded-full" style={{ background: 'var(--gold-500)' }} />
                 </div>
-                <p className="text-sm lg:text-base max-w-md" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                <p className="text-sm lg:text-base max-w-md" style={{ color: 'var(--white)', opacity: 0.75 }}>
                   {hero.ctaBannerDescription}
                 </p>
               </motion.div>
@@ -618,25 +623,29 @@ export default function HomePage() {
                 <div className="flex gap-4">
                   {[{ value: '50K+', label: 'Customers' }, { value: '200+', label: 'Artisans' }, { value: '4.9★', label: 'Rating' }].map((s) => (
                     <div key={s.label} className="text-center px-4 py-2 rounded-lg"
-                      style={{ background: 'rgba(184,134,11,0.15)', border: '1px solid rgba(184,134,11,0.25)' }}>
+                      style={{ background: 'rgba(212, 162, 76, 0.15)', border: '1px solid rgba(212, 162, 76, 0.25)' }}>
                       <p className="text-lg font-extrabold text-white leading-none">{s.value}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: '#c8a84b' }}>{s.label}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: 'var(--gold-500)' }}>{s.label}</p>
                     </div>
                   ))}
                 </div>
                 {/* buttons */}
                 <div className="flex gap-3">
                   <Link href="/register">
-                    <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    <motion.button
+                      whileHover={{ scale: 1.03, backgroundColor: 'var(--gold-600)' }}
+                      whileTap={{ scale: 0.97 }}
                       className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-lg"
-                      style={{ background: ETH_GOLD, color: '#fff', boxShadow: '0 4px 20px rgba(184,134,11,0.4)' }}>
+                      style={{ background: 'var(--gold-500)', color: 'var(--white)', boxShadow: '0 4px 20px rgba(212, 162, 76, 0.3)' }}>
                       <ShoppingBag className="w-4 h-4" /> Create Free Account
                     </motion.button>
                   </Link>
                   <Link href="/shop">
-                    <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    <motion.button
+                      whileHover={{ scale: 1.03, backgroundColor: 'rgba(44, 74, 124, 0.15)' }}
+                      whileTap={{ scale: 0.97 }}
                       className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-lg"
-                      style={{ border: '2px solid rgba(255,255,255,0.25)', color: '#fff' }}>
+                      style={{ border: '2px solid var(--navy-600)', color: 'var(--white)' }}>
                       Browse <ArrowRight className="w-4 h-4" />
                     </motion.button>
                   </Link>

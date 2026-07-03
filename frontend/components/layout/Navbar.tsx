@@ -86,23 +86,22 @@ export default function Navbar() {
             {logoUrl ? (
               <img src={logoUrl} alt={siteName} className="w-12 h-12 rounded-lg object-contain bg-white dark:bg-gray-800" />
             ) : (
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: '#b8860b' }}>
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'var(--gold-500)' }}>
                 <Package className="w-7 h-7 text-white" />
               </div>
             )}
-            <span className={`text-xl font-bold ${hasSolidHeader ? '' : 'text-white'}`} style={hasSolidHeader ? { color: 'var(--eth-gold)' } : {}}>
+            <span className="text-xl font-bold" style={{ color: 'var(--gold-500)' }}>
               {siteName}
             </span>
           </Link>
 
-          {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors cursor-pointer hover:underline ${hasSolidHeader ? 'hover:text-amber-700' : 'text-white/80 hover:text-white'}`}
-                style={hasSolidHeader ? { color: 'var(--eth-text-primary)' } : {}}
+                className="text-sm font-medium transition-colors cursor-pointer hover:underline hover:text-[var(--gold-500)] text-[var(--white)]/80 hover:text-[var(--white)]"
+                style={{ color: 'var(--white)' }}
               >
                 {link.label}
               </Link>
@@ -124,22 +123,22 @@ export default function Navbar() {
                   setSearchOpen(!searchOpen);
                 }
               }}
-              className={hasSolidHeader ? 'text-gray-700 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'}
+              className="text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]"
             >
               <Search className="w-5 h-5" />
             </Button>
 
             {/* Theme Toggle */}
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={hasSolidHeader ? 'text-gray-700 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'}>
+            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]">
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
 
             {/* Cart */}
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className={`relative ${hasSolidHeader ? 'text-gray-700 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'}`}>
+              <Button variant="ghost" size="icon" className="relative text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]">
                 <ShoppingCart className="w-5 h-5" />
                 {mounted && itemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs" style={{ background: '#b8860b', color: '#fff' }}>
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs" style={{ background: 'var(--gold-500)', color: 'var(--navy-800)' }}>
                     {itemCount > 99 ? '99+' : itemCount}
                   </Badge>
                 )}
@@ -150,7 +149,7 @@ export default function Navbar() {
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className={`rounded-full ${hasSolidHeader ? '' : 'hover:bg-white/10'}`}>
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatar} />
                       <AvatarFallback className="text-sm font-medium" style={{ background: 'var(--eth-gold-light)', color: 'var(--eth-gold-muted)' }}>
@@ -198,17 +197,17 @@ export default function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Button variant="ghost" size="sm" asChild className={hasSolidHeader ? 'text-gray-700 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'}>
+                <Button variant="ghost" size="sm" asChild className="text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]">
                   <Link href="/login">Login</Link>
                 </Button>
-                <Button size="sm" asChild className="hover:opacity-90" style={{ background: '#b8860b', color: '#fff' }}>
+                <Button size="sm" asChild className="hover:opacity-90" style={{ background: 'var(--gold-500)', color: 'var(--white)' }}>
                   <Link href="/register">Sign Up</Link>
                 </Button>
               </div>
             )}
 
             {/* Mobile Menu Toggle */}
-            <Button variant="ghost" size="icon" className={`md:hidden ${hasSolidHeader ? 'text-gray-700 hover:text-amber-700' : 'text-white/80 hover:text-white hover:bg-white/10'}`} onClick={() => setIsOpen(!isOpen)}>
+            <Button variant="ghost" size="icon" className="md:hidden text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
@@ -233,7 +232,7 @@ export default function Navbar() {
                   className="flex-1 px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2"
                   style={{ borderColor: 'var(--eth-border)', background: 'var(--eth-card-bg)', color: 'var(--eth-text-primary)', outlineColor: 'var(--eth-gold)' }}
                 />
-                <Button type="submit" style={{ background: '#b8860b', color: '#fff' }} className="hover:opacity-90">
+                <Button type="submit" style={{ background: 'var(--gold-500)', color: 'var(--white)' }} className="hover:opacity-90">
                   Search
                 </Button>
               </form>
