@@ -84,7 +84,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             {logoUrl ? (
-              <img src={logoUrl} alt={siteName} className="w-12 h-12 rounded-lg object-contain bg-white dark:bg-gray-800" />
+              <img src={logoUrl} alt={siteName} className="w-12 h-12 object-contain" />
             ) : (
               <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'var(--gold-500)' }}>
                 <Package className="w-7 h-7 text-white" />

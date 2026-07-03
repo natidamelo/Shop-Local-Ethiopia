@@ -15,7 +15,7 @@ export default function Footer() {
           <div className="col-span-2 sm:col-span-1 space-y-2">
             <Link href="/" className="flex items-center gap-2">
               {logoUrl ? (
-                <img src={logoUrl} alt={siteName} className="w-7 h-7 rounded-lg object-contain bg-white/10" />
+                <img src={logoUrl} alt={siteName} className="w-7 h-7 object-contain" />
               ) : (
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--gold-500)' }}>
                   <Package className="w-4 h-4 text-white" />
