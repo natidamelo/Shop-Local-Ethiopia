@@ -143,27 +143,30 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Cycling Best Seller Product Image */}
+            {/* Cycling Best Seller Product Image — blended */}
             {topSoldItems.length > 0 && (
-              <div className="hidden md:flex flex-col items-center gap-2 shrink-0 print:hidden">
-                <div className="relative w-36 h-36 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/20">
-                  {topSoldItems.map((item, i) => (
-                    <motion.img
-                      key={item._id}
-                      src={rewriteAssetUrl(item.thumbnail)}
-                      alt={item.name}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: i === activeHeroIdx ? 1 : 0 }}
-                      transition={{ duration: 0.8 }}
-                    />
-                  ))}
-                  {/* Best Seller badge */}
-                  <div className="absolute top-2 left-2 bg-amber-400 text-[#0A1628] text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+              <div className="hidden md:block relative shrink-0 w-52 h-36 print:hidden self-stretch">
+                {topSoldItems.map((item, i) => (
+                  <motion.img
+                    key={item._id}
+                    src={rewriteAssetUrl(item.thumbnail)}
+                    alt={item.name}
+                    className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                    style={{
+                      maskImage: 'radial-gradient(ellipse 85% 90% at 70% 50%, black 30%, transparent 100%)',
+                      WebkitMaskImage: 'radial-gradient(ellipse 85% 90% at 70% 50%, black 30%, transparent 100%)',
+                      opacity: i === activeHeroIdx ? 1 : 0,
+                      transition: 'opacity 0.8s ease',
+                    }}
+                  />
+                ))}
+                {/* Best Seller label */}
+                <div className="absolute bottom-1 right-1 flex flex-col items-end gap-1">
+                  <div className="bg-amber-400/90 text-[#0A1628] text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-sm">
                     <TrendingUp className="w-2.5 h-2.5" /> Best Seller
                   </div>
                   {/* Dot indicators */}
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                  <div className="flex gap-1 pr-0.5">
                     {topSoldItems.map((_, i) => (
                       <button
                         key={i}
@@ -175,9 +178,6 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-white/70 text-xs text-center max-w-[9rem] line-clamp-1">
-                  {topSoldItems[activeHeroIdx]?.name}
-                </p>
               </div>
             )}
           </div>
