@@ -146,10 +146,6 @@ export default function DashboardPage() {
                     Shop Now
                   </Link>
                 </Button>
-                <Button onClick={() => window.print()} className="bg-white text-[#16294D] hover:bg-gray-100 font-semibold shadow-md border-0">
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print Dashboard
-                </Button>
                 <Button className="bg-white text-[#16294D] hover:bg-gray-100 font-semibold shadow-md border-0" asChild>
                   <Link href="/dashboard/orders">
                     My Orders <ArrowRight className="w-4 h-4 ml-2" />
