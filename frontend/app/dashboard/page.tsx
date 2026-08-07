@@ -33,11 +33,23 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [recommendedItems, setRecommendedItems] = useState<any[]>([]);
+  const [topSoldItems, setTopSoldItems] = useState<any[]>([]);
+  const [activeHeroIdx, setActiveHeroIdx] = useState(0);
 
   useEffect(() => {
     fetchStats();
     fetchRecommended();
+    fetchTopSold();
   }, []);
+
+  // Cycle the hero image every 3 seconds
+  useEffect(() => {
+    if (topSoldItems.length < 2) return;
+    const timer = setInterval(() => {
+      setActiveHeroIdx(prev => (prev + 1) % topSoldItems.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [topSoldItems.length]);
 
   const fetchStats = async () => {
     try {
@@ -53,6 +65,14 @@ export default function DashboardPage() {
     try {
       const res = await api.get('/products?limit=4&sort=-rating');
       setRecommendedItems(res.data.data || []);
+    } catch {}
+  };
+
+  const fetchTopSold = async () => {
+    try {
+      const res = await api.get('/products?limit=4&sort=-soldCount&isActive=true');
+      const items = (res.data.data || []).filter((p: any) => p.thumbnail);
+      setTopSoldItems(items);
     } catch {}
   };
 
@@ -123,20 +143,43 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Hero Emojis */}
-            <div className="hidden md:grid grid-cols-2 gap-3 shrink-0 print:hidden">
-              {['☕', '🧺', '📿', '🫓'].map((emoji, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl shadow-lg hover:bg-white/30 transition-colors cursor-pointer"
-                >
-                  {emoji}
-                </motion.div>
-              ))}
-            </div>
+            {/* Cycling Best Seller Product Image */}
+            {topSoldItems.length > 0 && (
+              <div className="hidden md:flex flex-col items-center gap-2 shrink-0 print:hidden">
+                <div className="relative w-36 h-36 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/20">
+                  {topSoldItems.map((item, i) => (
+                    <motion.img
+                      key={item._id}
+                      src={rewriteAssetUrl(item.thumbnail)}
+                      alt={item.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: i === activeHeroIdx ? 1 : 0 }}
+                      transition={{ duration: 0.8 }}
+                    />
+                  ))}
+                  {/* Best Seller badge */}
+                  <div className="absolute top-2 left-2 bg-amber-400 text-[#0A1628] text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <TrendingUp className="w-2.5 h-2.5" /> Best Seller
+                  </div>
+                  {/* Dot indicators */}
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                    {topSoldItems.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveHeroIdx(i)}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          i === activeHeroIdx ? 'bg-white scale-125' : 'bg-white/40'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-white/70 text-xs text-center max-w-[9rem] line-clamp-1">
+                  {topSoldItems[activeHeroIdx]?.name}
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
 
