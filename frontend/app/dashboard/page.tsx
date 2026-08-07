@@ -151,10 +151,10 @@ export default function DashboardPage() {
                     key={item._id}
                     src={rewriteAssetUrl(item.thumbnail)}
                     alt={item.name}
-                    className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                    className="absolute inset-0 w-full h-full object-cover"
                     style={{
-                      maskImage: 'radial-gradient(ellipse 85% 90% at 70% 50%, black 30%, transparent 100%)',
-                      WebkitMaskImage: 'radial-gradient(ellipse 85% 90% at 70% 50%, black 30%, transparent 100%)',
+                      maskImage: 'radial-gradient(ellipse 65% 75% at 68% 50%, black 0%, black 20%, transparent 70%)',
+                      WebkitMaskImage: 'radial-gradient(ellipse 65% 75% at 68% 50%, black 0%, black 20%, transparent 70%)',
                       opacity: i === activeHeroIdx ? 1 : 0,
                       transition: 'opacity 0.8s ease',
                     }}
