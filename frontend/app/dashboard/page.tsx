@@ -82,7 +82,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 p-7 sm:p-8 shadow-xl ring-1 ring-white/15 print:bg-none print:shadow-none print:ring-0 print:text-black print:border print:border-gray-300 print:rounded-none"
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-600 to-violet-600 p-7 sm:p-8 shadow-xl ring-1 ring-white/15 print:bg-none print:shadow-none print:ring-0 print:text-black print:border print:border-gray-300 print:rounded-none"
         >
           {/* Background decorations */}
           <div className="absolute inset-0 overflow-hidden">
@@ -104,17 +104,17 @@ export default function DashboardPage() {
                 Discover new handmade cultural items and track your orders — all in one place.
               </p>
               <div className="flex flex-wrap gap-3 pt-2 print:hidden">
-                <Button className="bg-white text-amber-700 hover:bg-amber-50 font-semibold shadow-md" asChild>
+                <Button className="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold shadow-md" asChild>
                   <Link href="/shop">
                     <ShoppingBag className="w-4 h-4 mr-2" />
                     Shop Now
                   </Link>
                 </Button>
-                <Button onClick={() => window.print()} className="bg-white text-amber-700 hover:bg-amber-50 font-semibold shadow-md border-0">
+                <Button onClick={() => window.print()} className="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold shadow-md border-0">
                   <Printer className="w-4 h-4 mr-2" />
                   Print Dashboard
                 </Button>
-                <Button className="bg-white text-amber-700 hover:bg-amber-50 font-semibold shadow-md border-0" asChild>
+                <Button className="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold shadow-md border-0" asChild>
                   <Link href="/dashboard/orders">
                     My Orders <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
