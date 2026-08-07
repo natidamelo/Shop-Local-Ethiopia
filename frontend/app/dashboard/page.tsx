@@ -259,7 +259,7 @@ export default function DashboardPage() {
                     </h3>
                     <div className="flex items-center gap-1 mb-2">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={`w-3 h-3 ${s <= Math.round(item.rating || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                        <Star key={s} className={`w-3 h-3 ${s <= Math.round(item.rating || 0) ? 'fill-amber-400 text-amber-400' : 'fill-amber-100 text-amber-200'}`} />
                       ))}
                       <span className="text-xs text-gray-400">({item.numReviews || 0})</span>
                     </div>
