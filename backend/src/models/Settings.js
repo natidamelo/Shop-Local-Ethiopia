@@ -130,11 +130,11 @@ const settingsSchema = new mongoose.Schema(
     navLinks: {
       type: [navLinkSchema],
       default: [
-        { href: '/shop', label: 'Shop' },
-        { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
-        { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
-        { href: '/shop?featured=true', label: 'Featured' },
-        { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
+        { href: '/shop', label: 'Shop Now' },
+        { href: '/why-choose-as', label: 'Why Choose As' },
+        { href: '/shop?featured=true', label: 'Best Seller' },
+        { href: '/traditional-club', label: 'Traditional Club' },
+        { href: '/bazar-vendor-apply', label: 'About Our Bazzar' },
       ],
     },
 

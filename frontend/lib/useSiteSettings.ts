@@ -255,11 +255,11 @@ const defaults: SiteSettings = {
     { title: 'Instant Digital', desc: 'Instant delivery for courses, downloads & software.' },
   ],
   navLinks: [
-    { href: '/shop', label: 'Shop' },
-    { href: '/shop/hand-woven-textiles-and-apparel', label: 'Textiles & Apparel' },
-    { href: '/shop/artisan-craft-and-home-decor', label: 'Artisan & Decor' },
-    { href: '/shop?featured=true', label: 'Featured' },
-    { href: '/bazar-vendor-apply', label: 'Join Bazar as Vendor' },
+    { href: '/shop', label: 'Shop Now' },
+    { href: '/why-choose-as', label: 'Why Choose As' },
+    { href: '/shop?featured=true', label: 'Best Seller' },
+    { href: '/traditional-club', label: 'Traditional Club' },
+    { href: '/bazar-vendor-apply', label: 'About Our Bazzar' },
   ],
   whyChooseUsPage: whyChooseUsPageDefaults,
 };
@@ -327,9 +327,14 @@ export function useSiteSettings() {
     welcomeCouponCode: data?.welcomeCouponCode ?? defaults.welcomeCouponCode,
     welcomeDiscount: data?.welcomeDiscount ?? defaults.welcomeDiscount,
     supportPages: (data?.supportPages ?? {}) as SupportPages,
-    navLinks: Array.isArray(data?.navLinks) && data.navLinks.length > 0
+    navLinks: (Array.isArray(data?.navLinks) && data.navLinks.length > 0
       ? data.navLinks
-      : defaults.navLinks,
+      : defaults.navLinks).map((link: any) => {
+        if (link.label && link.label.toLowerCase().includes('traditional club')) {
+          return { ...link, href: '/traditional-club' };
+        }
+        return link;
+      }),
     whyChooseUsPage: {
       ...whyChooseUsPageRaw,
       loomImageUrl: rewriteAssetUrl(whyChooseUsPageRaw.loomImageUrl),
