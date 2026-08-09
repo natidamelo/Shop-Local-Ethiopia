@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useSiteSettings } from '@/lib/useSiteSettings';
 import { toast } from 'sonner';
+import api from '@/lib/api';
 
 function LoginInner() {
   const router = useRouter();
@@ -22,6 +23,20 @@ function LoginInner() {
   const [showPassword, setShowPassword] = useState(false);
   const [requiresMfa, setRequiresMfa] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendingVerification, setResendingVerification] = useState(false);
+
+  const handleResend = async () => {
+    if (!unverifiedEmail || resendingVerification) return;
+    setResendingVerification(true);
+    try {
+      await api.post('/auth/resend-verification', { email: unverifiedEmail });
+      toast.success('Verification email sent! Check your inbox.');
+    } catch {
+      toast.error('Failed to resend. Please try again.');
+    } finally {
+      setResendingVerification(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,9 +91,17 @@ function LoginInner() {
           {unverifiedEmail && (
             <div className="mb-5 p-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700">
               <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">📧 Verify your email first</p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                A verification link has been sent to <strong>{unverifiedEmail}</strong>. Please check your inbox (and spam folder) and click the link to activate your account.
+              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed mb-3">
+                A verification link has been sent to <strong>{unverifiedEmail}</strong>. Please check your inbox and spam folder, then click the link to activate your account.
               </p>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendingVerification}
+                className="text-xs font-semibold text-amber-800 dark:text-amber-300 underline underline-offset-2 hover:opacity-70 transition-opacity disabled:opacity-50"
+              >
+                {resendingVerification ? 'Sending...' : "Didn't receive it? Resend verification email"}
+              </button>
             </div>
           )}
 

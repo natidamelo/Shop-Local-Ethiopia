@@ -269,6 +269,31 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
+// @POST /api/auth/resend-verification
+const resendVerification = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Always respond the same way to prevent email enumeration
+    if (!user || user.emailVerified) {
+      return res.json({ success: true, message: 'If that email exists and is unverified, a new link has been sent.' });
+    }
+
+    const { token: verifyToken, hashedToken: hashedVerifyToken } = generateResetToken();
+    await User.findByIdAndUpdate(user._id, { emailVerifyToken: hashedVerifyToken });
+    await sendVerificationEmail(user, verifyToken);
+
+    res.json({ success: true, message: 'Verification email sent. Please check your inbox.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @POST /api/auth/mfa/setup
 const setupMfa = async (req, res, next) => {
   try {
@@ -340,4 +365,4 @@ const disableMfa = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, logout, refreshToken, forgotPassword, resetPassword, verifyEmail, setupMfa, verifyMfa, disableMfa };
+module.exports = { register, login, logout, refreshToken, forgotPassword, resetPassword, verifyEmail, resendVerification, setupMfa, verifyMfa, disableMfa };

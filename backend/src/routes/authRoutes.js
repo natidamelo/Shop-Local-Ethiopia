@@ -9,6 +9,7 @@ const {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  resendVerification,
   setupMfa,
   verifyMfa,
   disableMfa,
@@ -21,6 +22,7 @@ router.post('/refresh', refreshToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.get('/verify-email', verifyEmail);
+router.post('/resend-verification', resendVerification);
 router.post('/mfa/setup', protect, setupMfa);
 router.post('/mfa/verify', protect, verifyMfa);
 router.post('/mfa/disable', protect, disableMfa);
