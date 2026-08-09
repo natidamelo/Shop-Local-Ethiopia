@@ -21,9 +21,11 @@ function LoginInner() {
   const [form, setForm] = useState({ email: '', password: '', mfaToken: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [requiresMfa, setRequiresMfa] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUnverifiedEmail('');
     try {
       const result = await login(form.email, form.password, requiresMfa ? form.mfaToken : undefined);
       if (result.requiresMfa) {
@@ -34,7 +36,11 @@ function LoginInner() {
       toast.success('Welcome back!');
       router.push(redirectTo);
     } catch (err: any) {
-      toast.error(err.message);
+      if (err.code === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(form.email);
+      } else {
+        toast.error(err.message);
+      }
     }
   };
 
@@ -65,6 +71,17 @@ function LoginInner() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+
+          {/* Email not verified banner */}
+          {unverifiedEmail && (
+            <div className="mb-5 p-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700">
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">📧 Verify your email first</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                A verification link has been sent to <strong>{unverifiedEmail}</strong>. Please check your inbox (and spam folder) and click the link to activate your account.
+              </p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {!requiresMfa ? (
               <>

@@ -82,13 +82,17 @@ const login = async (req, res, next) => {
     }
 
     if (!user.emailVerified) {
-      // Send a new verification email in the background but don't block login
+      // Resend verification email so user can verify
       try {
         const { token: verifyToken, hashedToken: hashedVerifyToken } = generateResetToken();
         await User.findByIdAndUpdate(user._id, { emailVerifyToken: hashedVerifyToken });
         await sendVerificationEmail(user, verifyToken);
       } catch {}
-      // Allow login but flag email as unverified so frontend can show a banner
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email before logging in. A new verification link has been sent to your inbox.',
+        code: 'EMAIL_NOT_VERIFIED',
+      });
     }
 
     if (user.mfaEnabled) {
