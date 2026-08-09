@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '../api';
 import { useCartStore, loadUserCart, saveUserCart } from './cartStore';
+import { PROMO_DISMISSED_KEY } from '../promoConstants';
 
 interface User {
   _id: string;
@@ -84,7 +85,7 @@ export const useAuthStore = create<AuthState>()(
           await api.post('/auth/logout');
         } catch {}
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('promo_v3_dismissed_at'); // show promo again after logout
+        localStorage.removeItem(PROMO_DISMISSED_KEY); // show promo again after logout
         set({ user: null, accessToken: null, isAuthenticated: false });
         useCartStore.getState().clearCart();
       },

@@ -7,8 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useSiteSettings } from '@/lib/useSiteSettings';
 import { toast } from 'sonner';
+import { PROMO_DISMISSED_KEY } from '@/lib/promoConstants';
 
-const STORAGE_KEY = 'promo_v4_dismissed_at'; // bumped to invalidate old dismissals
+const STORAGE_KEY = PROMO_DISMISSED_KEY;
 const DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const MODAL_DELAY_MS = 3000;
 const TAB_DELAY_MS   = 800;
