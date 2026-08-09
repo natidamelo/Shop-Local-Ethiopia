@@ -49,6 +49,7 @@ app.post('/api/webhooks/chapa', express.json(), chapaWebhookHandler);
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:3000',
+  'https://shop-local-ethiopia.vercel.app', // production frontend
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
