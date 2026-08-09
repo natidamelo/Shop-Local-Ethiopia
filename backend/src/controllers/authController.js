@@ -39,24 +39,22 @@ const register = async (req, res, next) => {
 
     const user = await User.create({ name, email, password, emailVerifyToken: hashedVerifyToken });
 
-    try {
-      await sendWelcomeEmail(user);
-    } catch {}
-
-    try {
-      await sendVerificationEmail(user, verifyToken);
-    } catch {}
-
     const accessToken = generateAccessToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id);
 
     await User.findByIdAndUpdate(user._id, { $push: { refreshTokens: refreshToken } });
     setCookies(res, accessToken, refreshToken);
 
+    // Respond immediately — send emails in background
     res.status(201).json({
       success: true,
       message: 'Registration successful',
       data: { user, accessToken },
+    });
+
+    setImmediate(async () => {
+      try { await sendWelcomeEmail(user); } catch {}
+      try { await sendVerificationEmail(user, verifyToken); } catch {}
     });
   } catch (error) {
     next(error);
@@ -82,12 +80,15 @@ const login = async (req, res, next) => {
     }
 
     if (!user.emailVerified) {
-      // Resend verification email so user can verify
-      try {
-        const { token: verifyToken, hashedToken: hashedVerifyToken } = generateResetToken();
-        await User.findByIdAndUpdate(user._id, { emailVerifyToken: hashedVerifyToken });
-        await sendVerificationEmail(user, verifyToken);
-      } catch {}
+      // Fire verification email in background — respond immediately, don't block on SMTP
+      setImmediate(async () => {
+        try {
+          const { token: verifyToken, hashedToken: hashedVerifyToken } = generateResetToken();
+          await User.findByIdAndUpdate(user._id, { emailVerifyToken: hashedVerifyToken });
+          await sendVerificationEmail(user, verifyToken);
+        } catch {}
+      });
+
       return res.status(403).json({
         success: false,
         message: 'Please verify your email before logging in. A new verification link has been sent to your inbox.',

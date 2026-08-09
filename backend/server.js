@@ -175,6 +175,20 @@ const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`\n🚀 ShopL API running on http://localhost:${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+
+  // Keep-alive ping for Render free tier (spins down after ~15 min of inactivity)
+  if (process.env.NODE_ENV === 'production') {
+    const https = require('https');
+    const SELF_URL = process.env.RENDER_EXTERNAL_URL || '';
+    if (SELF_URL) {
+      setInterval(() => {
+        https.get(`${SELF_URL}/api/health`, (res) => {
+          console.log(`[keep-alive] ping → ${res.statusCode}`);
+        }).on('error', () => {});
+      }, 14 * 60 * 1000); // every 14 minutes
+      console.log(`🏓 Keep-alive pinging ${SELF_URL}/api/health every 14 min`);
+    }
+  }
 });
 
 module.exports = app;
