@@ -22,10 +22,11 @@ function RegisterInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const couponFromPromo = searchParams.get('coupon');
+  const emailFromPromo = searchParams.get('email') || '';
   const redirectTo = searchParams.get('redirect') || '/login';
   const { register, isLoading } = useAuthStore();
   const { siteName } = useSiteSettings();
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState({ name: '', email: emailFromPromo, password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +37,9 @@ function RegisterInner() {
     }
     try {
       await register(form.name, form.email, form.password);
+      if (couponFromPromo) {
+        localStorage.setItem('pending_welcome_coupon', couponFromPromo);
+      }
       toast.success('Account created! Please check your email to verify your account.');
       router.push(redirectTo === '/checkout' ? '/login?redirect=/checkout' : '/login');
     } catch (err: any) {

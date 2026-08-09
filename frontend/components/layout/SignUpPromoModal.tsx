@@ -290,40 +290,37 @@ export default function SignUpPromoModal() {
                       transition={{ duration: 0.35 }}
                       className="text-center"
                     >
-                      {/* Success icon */}
+                      {/* Reserved icon */}
                       <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: 'linear-gradient(135deg, #f5e6c8, #fdf3dc)' }}>
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                          <circle cx="14" cy="14" r="13" stroke="#b8860b" strokeWidth="1.5" />
-                          <path d="M8 14.5L12 18.5L20 10" stroke="#b8860b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <rect x="5" y="11" width="18" height="12" rx="2" stroke="#b8860b" strokeWidth="1.5" />
+                          <path d="M9 11V8a5 5 0 0110 0v3" stroke="#b8860b" strokeWidth="1.5" strokeLinecap="round" />
+                          <circle cx="14" cy="17" r="1.5" fill="#b8860b" />
                         </svg>
                       </div>
                       <h3 className="text-2xl font-black mb-1" style={{ color: '#1a1008', fontFamily: 'Georgia, serif' }}>
-                        You're In!
+                        Discount Reserved!
                       </h3>
-                      <p className="text-sm text-gray-500 mb-6">
-                        Use this code at checkout to get <strong className="text-gray-700">{welcomeDiscount} off</strong>:
+                      <p className="text-sm text-gray-500 mb-5">
+                        Your <strong className="text-gray-700">{welcomeDiscount} off</strong> coupon has been locked in for <strong className="text-amber-800 font-medium">{email}</strong>.
                       </p>
-                      {/* Coupon code */}
-                      <button
-                        onClick={() => { navigator.clipboard?.writeText(welcomeCouponCode); toast.success('Code copied!'); }}
-                        className="w-full py-4 px-4 border-2 border-dashed font-mono font-black text-xl tracking-[0.2em] transition-all hover:bg-amber-50 active:scale-[0.98] group"
-                        style={{ borderColor: '#b8860b', color: '#b8860b', borderRadius: '2px' }}
-                        title="Click to copy"
-                      >
-                        {welcomeCouponCode}
-                      </button>
-                      <p className="text-xs text-gray-400 mt-2">
-                        👆 Click to copy · Valid on your first order
-                      </p>
+
+                      <div className="p-4 mb-6 rounded text-left flex items-start gap-3 border border-amber-200 bg-amber-50/60">
+                        <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
+                        <p className="text-xs text-amber-900 leading-relaxed">
+                          Create your account now to reveal your exclusive code and automatically apply <strong className="font-bold">{welcomeDiscount} off</strong> at checkout!
+                        </p>
+                      </div>
+
                       <button
                         onClick={() => {
                           dismiss();
-                          router.push(isAuthenticated ? '/shop' : `/register?coupon=${encodeURIComponent(welcomeCouponCode)}`);
+                          router.push(`/register?email=${encodeURIComponent(email)}&coupon=${encodeURIComponent(welcomeCouponCode)}`);
                         }}
-                        className="mt-6 w-full py-3 text-sm font-semibold text-white uppercase tracking-widest transition-all hover:brightness-110 active:scale-[0.98]"
+                        className="w-full py-3.5 text-sm font-semibold text-white uppercase tracking-widest transition-all hover:brightness-110 active:scale-[0.98]"
                         style={{ background: 'linear-gradient(135deg, #b8860b 0%, #d4a017 100%)', borderRadius: '2px' }}
                       >
-                        {isAuthenticated ? 'Start Shopping →' : 'Create Account to Use Code →'}
+                        Create Account to Unlock Code →
                       </button>
                     </motion.div>
                   )}
