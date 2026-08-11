@@ -10,7 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
-import { useSiteSettings, formatPrice } from '@/lib/useSiteSettings';
+import { useSiteSettings, formatPrice, CurrencyCode } from '@/lib/useSiteSettings';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const PIE_COLORS = ['#8b5cf6', '#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#6366f1'];
@@ -29,7 +29,7 @@ interface RevTooltipProps {
   active?: boolean;
   payload?: Array<{ dataKey?: string; value?: number | string }>;
   label?: string;
-  currency: string;
+  currency: CurrencyCode;
 }
 function RevTooltip({ active, payload, label, currency }: RevTooltipProps) {
   if (!active || !payload?.length) return null;
