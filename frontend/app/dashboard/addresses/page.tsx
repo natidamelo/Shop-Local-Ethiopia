@@ -104,7 +104,7 @@ export default function AddressesPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const streetCheck = validateStreet(form.street);
+    const streetCheck = validateStreet(form.street, form.country);
     if (!streetCheck.isValid) {
       toast.error(streetCheck.error);
       return;
@@ -116,13 +116,12 @@ export default function AddressesPage() {
       return;
     }
 
-    if (form.zipCode) {
-      const zipCheck = validateZipCode(form.zipCode);
-      if (!zipCheck.isValid) {
-        toast.error(zipCheck.error);
-        return;
-      }
+    const zipCheck = validateZipCode(form.zipCode, form.country);
+    if (!zipCheck.isValid) {
+      toast.error(zipCheck.error);
+      return;
     }
+
 
     setSaving(true);
     try {

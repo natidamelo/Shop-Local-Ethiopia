@@ -872,9 +872,9 @@ export default function CheckoutPage() {
   const fnRes = validateName(shippingAddress.firstName, 'First name');
   const lnRes = validateName(shippingAddress.lastName, 'Last name');
   const phoneRes = validatePhone(shippingAddress.phone, shippingAddress.country);
-  const streetRes = validateStreet(shippingAddress.street);
+  const streetRes = validateStreet(shippingAddress.street, shippingAddress.country);
   const cityRes = validateCity(shippingAddress.city, shippingAddress.country);
-  const zipRes = validateZipCode(shippingAddress.zipCode);
+  const zipRes = validateZipCode(shippingAddress.zipCode, shippingAddress.country);
 
   const isContactValid = emailRes.isValid;
   const isShippingValid = isLocalPickup
