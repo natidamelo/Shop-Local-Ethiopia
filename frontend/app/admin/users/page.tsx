@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, UserX, UserCheck, Trash2, Edit, Shield } from 'lucide-react';
+import { Search, UserX, UserCheck, Trash2, MailCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +67,16 @@ export default function AdminUsersPage() {
     }
   };
 
+  const verifyEmail = async (userId: string) => {
+    try {
+      await api.put(`/admin/users/${userId}`, { emailVerified: true });
+      toast.success('Email verified successfully');
+      fetchUsers();
+    } catch {
+      toast.error('Failed to verify email');
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -105,6 +115,7 @@ export default function AdminUsersPage() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -149,11 +160,27 @@ export default function AdminUsersPage() {
                       {user.isSuspended ? 'Suspended' : 'Active'}
                     </Badge>
                   </td>
+                  <td className="px-4 py-3">
+                    <Badge className={`text-xs border-0 ${user.emailVerified ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {user.emailVerified ? '✓ Verified' : '✗ Unverified'}
+                    </Badge>
+                  </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end">
+                      {!user.emailVerified && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => verifyEmail(user._id)}
+                          title="Manually verify email"
+                        >
+                          <MailCheck className="w-4 h-4 text-blue-600" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

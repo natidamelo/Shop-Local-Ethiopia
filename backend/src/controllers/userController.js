@@ -182,13 +182,14 @@ const getUserById = async (req, res, next) => {
 // @PUT /api/admin/users/:id
 const updateUser = async (req, res, next) => {
   try {
-    const { name, email, role, isActive, isSuspended } = req.body;
+    const { name, email, role, isActive, isSuspended, emailVerified } = req.body;
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (email !== undefined) updates.email = email;
     if (role !== undefined) updates.role = role;
     if (isActive !== undefined) updates.isActive = isActive;
     if (isSuspended !== undefined) updates.isSuspended = isSuspended;
+    if (emailVerified !== undefined) updates.emailVerified = emailVerified;
 
     const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
