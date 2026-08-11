@@ -22,6 +22,7 @@ import Navbar from '@/components/layout/Navbar';
 import { useAuthStore } from '@/lib/store/authStore';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { validateStreet, validateCity, validateZipCode } from '@/lib/validation';
 
 const ADDRESS_LABELS = [
   { value: 'Home', label: 'Home' },
@@ -102,6 +103,27 @@ export default function AddressesPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const streetCheck = validateStreet(form.street);
+    if (!streetCheck.isValid) {
+      toast.error(streetCheck.error);
+      return;
+    }
+
+    const cityCheck = validateCity(form.city, form.country);
+    if (!cityCheck.isValid) {
+      toast.error(cityCheck.error);
+      return;
+    }
+
+    if (form.zipCode) {
+      const zipCheck = validateZipCode(form.zipCode);
+      if (!zipCheck.isValid) {
+        toast.error(zipCheck.error);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       if (editingId) {
@@ -119,6 +141,7 @@ export default function AddressesPage() {
       setSaving(false);
     }
   };
+
 
   const setDefault = async (id: string) => {
     try {

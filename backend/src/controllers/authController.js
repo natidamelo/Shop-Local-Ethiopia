@@ -5,6 +5,7 @@ const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/jwt');
 const { generateResetToken } = require('../utils/helpers');
 const { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } = require('../utils/email');
+const { validateName, validateEmail } = require('../utils/validation');
 
 const setCookies = (res, accessToken, refreshToken) => {
   res.cookie('accessToken', accessToken, {
@@ -29,6 +30,17 @@ const register = async (req, res, next) => {
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
+
+    const nameCheck = validateName(name, 'Full Name');
+    if (!nameCheck.isValid) {
+      return res.status(400).json({ success: false, message: nameCheck.error });
+    }
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.isValid) {
+      return res.status(400).json({ success: false, message: emailCheck.error });
+    }
+
 
     const existing = await User.findOne({ email });
     if (existing) {

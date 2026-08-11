@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useSiteSettings } from '@/lib/useSiteSettings';
 import { toast } from 'sonner';
+import { validateName, validateEmail } from '@/lib/validation';
 
 const passwordRequirements = [
   { label: 'At least 6 characters', test: (p: string) => p.length >= 6 },
@@ -31,6 +32,19 @@ function RegisterInner() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const nameCheck = validateName(form.name, 'Full Name');
+    if (!nameCheck.isValid) {
+      toast.error(nameCheck.error);
+      return;
+    }
+
+    const emailCheck = validateEmail(form.email);
+    if (!emailCheck.isValid) {
+      toast.error(emailCheck.error);
+      return;
+    }
+
     if (form.password !== form.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -46,6 +60,7 @@ function RegisterInner() {
       toast.error(err.message);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-violet-950 flex items-center justify-center p-4">

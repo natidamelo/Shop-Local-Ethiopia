@@ -6,6 +6,7 @@ const ShippingRate = require('../models/ShippingRate');
 const { sendOrderConfirmationEmail } = require('../utils/email');
 const { reserveStock, confirmStockDeduction, releaseReservedStock, restoreStock } = require('./stockController');
 const { calculateShippingForCarrier } = require('./shippingController');
+const { validateShippingAddress } = require('../utils/validation');
 
 // @POST /api/orders
 const createOrder = async (req, res, next) => {
@@ -15,6 +16,18 @@ const createOrder = async (req, res, next) => {
     if (!items || items.length === 0) {
       return res.status(400).json({ success: false, message: 'No items in order' });
     }
+
+    if (!shippingAddress) {
+      return res.status(400).json({ success: false, message: 'Shipping address is required' });
+    }
+
+    const isLocalPickup = shippingMethod === 'local_pickup';
+    const addressValidation = validateShippingAddress(shippingAddress, isLocalPickup);
+    if (!addressValidation.isValid) {
+      const firstError = Object.values(addressValidation.errors)[0] || 'Invalid shipping address data';
+      return res.status(400).json({ success: false, message: firstError, errors: addressValidation.errors });
+    }
+
 
     let subtotal = 0;
     const orderItems = [];

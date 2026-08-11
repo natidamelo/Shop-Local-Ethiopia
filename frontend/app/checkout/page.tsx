@@ -18,6 +18,15 @@ import { useSiteSettings, formatPrice } from '@/lib/useSiteSettings';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import {
+  validateEmail,
+  validateName,
+  validatePhone,
+  validateStreet,
+  validateCity,
+  validateZipCode,
+} from '@/lib/validation';
 import {
   Elements,
   CardNumberElement,
@@ -435,17 +444,28 @@ function DiscountInput() {
 function PhoneInput({
   value,
   onChange,
+  onBlur,
   countryName,
+  error,
 }: {
   value: string;
   onChange: (val: string) => void;
+  onBlur?: () => void;
   countryName?: string;
+  error?: boolean;
 }) {
   const [dialCode, setDialCode] = useState('+251');
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [localNumber, setLocalNumber] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+
+  // Sync internal localNumber if external value changes (e.g. initial profile load)
+  useEffect(() => {
+    if (value && value.startsWith(dialCode)) {
+      setLocalNumber(value.slice(dialCode.length));
+    }
+  }, [value, dialCode]);
 
   // Auto-sync dial code when country changes
   useEffect(() => {
@@ -495,7 +515,10 @@ function PhoneInput({
       <button
         type="button"
         onClick={() => { setOpen((v) => !v); setSearch(''); }}
-        className="flex items-center gap-1.5 px-3 h-10 border border-r-0 rounded-l-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors min-w-[80px]"
+        className={cn(
+          "flex items-center gap-1.5 px-3 h-10 border border-r-0 rounded-l-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors min-w-[80px]",
+          error && "border-red-500 bg-red-50/20"
+        )}
       >
         <span>{selected.flag}</span>
         <span className="text-xs text-gray-600 dark:text-gray-400">{dialCode}</span>
@@ -504,10 +527,12 @@ function PhoneInput({
       <Input
         value={localNumber}
         onChange={(e) => handleNumberChange(e.target.value)}
+        onBlur={onBlur}
         placeholder="911 000 000"
-        className="flex-1 rounded-l-none h-10"
+        className={cn("flex-1 rounded-l-none h-10", error && "border-red-500 focus-visible:ring-red-500 bg-red-50/20")}
         type="tel"
       />
+
       {open && (
         <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden w-64">
           <div className="p-2 border-b border-gray-100 dark:border-gray-700">
@@ -823,15 +848,55 @@ export default function CheckoutPage() {
     }
   };
 
-  const isContactValid = contact.email.includes('@');
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const markTouched = (field: string) => {
+    setTouched((t) => ({ ...t, [field]: true }));
+  };
+
+  const markAllTouched = () => {
+    setTouched({
+      email: true,
+      firstName: true,
+      lastName: true,
+      street: true,
+      city: true,
+      phone: true,
+      zipCode: true,
+    });
+  };
+
   const isLocalPickup = selectedShipping === 'local_pickup';
+
+  const emailRes = validateEmail(contact.email);
+  const fnRes = validateName(shippingAddress.firstName, 'First name');
+  const lnRes = validateName(shippingAddress.lastName, 'Last name');
+  const phoneRes = validatePhone(shippingAddress.phone, shippingAddress.country);
+  const streetRes = validateStreet(shippingAddress.street);
+  const cityRes = validateCity(shippingAddress.city, shippingAddress.country);
+  const zipRes = validateZipCode(shippingAddress.zipCode);
+
+  const isContactValid = emailRes.isValid;
   const isShippingValid = isLocalPickup
-    ? shippingAddress.firstName && shippingAddress.lastName && shippingAddress.phone
-    : shippingAddress.firstName &&
-      shippingAddress.lastName &&
-      shippingAddress.street &&
-      shippingAddress.city &&
-      shippingAddress.country;
+    ? fnRes.isValid && lnRes.isValid && phoneRes.isValid
+    : fnRes.isValid && lnRes.isValid && streetRes.isValid && cityRes.isValid && phoneRes.isValid && zipRes.isValid;
+
+  const handleContinueToShipping = () => {
+    markAllTouched();
+    if (!isContactValid) {
+      toast.error(emailRes.error || 'Please enter a valid email address');
+      return;
+    }
+    if (!isShippingValid) {
+      const firstErr = (isLocalPickup
+        ? [fnRes, lnRes, phoneRes]
+        : [fnRes, lnRes, streetRes, cityRes, phoneRes, zipRes]
+      ).find((r) => !r.isValid)?.error;
+      toast.error(firstErr || 'Please enter valid real information before continuing');
+      return;
+    }
+    setStep(1);
+  };
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -1051,8 +1116,13 @@ export default function CheckoutPage() {
                             type="email"
                             value={contact.email}
                             onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
+                            onBlur={() => markTouched('email')}
                             placeholder="you@example.com"
+                            className={cn(touched.email && !emailRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                           />
+                          {touched.email && !emailRes.isValid && (
+                            <p className="text-xs text-red-500 font-medium mt-1">{emailRes.error}</p>
+                          )}
                         </div>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -1097,16 +1167,26 @@ export default function CheckoutPage() {
                             <Input
                               value={shippingAddress.firstName}
                               onChange={(e) => setShippingAddress((p) => ({ ...p, firstName: e.target.value }))}
+                              onBlur={() => markTouched('firstName')}
                               placeholder="Abebe"
+                              className={cn(touched.firstName && !fnRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                             />
+                            {touched.firstName && !fnRes.isValid && (
+                              <p className="text-xs text-red-500 font-medium mt-1">{fnRes.error}</p>
+                            )}
                           </div>
                           <div className="space-y-1.5">
                             <Label>Last name</Label>
                             <Input
                               value={shippingAddress.lastName}
                               onChange={(e) => setShippingAddress((p) => ({ ...p, lastName: e.target.value }))}
+                              onBlur={() => markTouched('lastName')}
                               placeholder="Girma"
+                              className={cn(touched.lastName && !lnRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                             />
+                            {touched.lastName && !lnRes.isValid && (
+                              <p className="text-xs text-red-500 font-medium mt-1">{lnRes.error}</p>
+                            )}
                           </div>
                         </div>
                         {!isLocalPickup && (
@@ -1116,8 +1196,13 @@ export default function CheckoutPage() {
                               <Input
                                 value={shippingAddress.street}
                                 onChange={(e) => setShippingAddress((p) => ({ ...p, street: e.target.value }))}
-                                placeholder="123 Bole Road"
+                                onBlur={() => markTouched('street')}
+                                placeholder="123 Bole Road, House #45"
+                                className={cn(touched.street && !streetRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                               />
+                              {touched.street && !streetRes.isValid && (
+                                <p className="text-xs text-red-500 font-medium mt-1">{streetRes.error}</p>
+                              )}
                             </div>
                             <div className="col-span-2 space-y-1.5">
                               <Label>Apartment, suite, etc. <span className="text-gray-400">(optional)</span></Label>
@@ -1132,16 +1217,26 @@ export default function CheckoutPage() {
                               <Input
                                 value={shippingAddress.city}
                                 onChange={(e) => setShippingAddress((p) => ({ ...p, city: e.target.value }))}
+                                onBlur={() => markTouched('city')}
                                 placeholder="Addis Ababa"
+                                className={cn(touched.city && !cityRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                               />
+                              {touched.city && !cityRes.isValid && (
+                                <p className="text-xs text-red-500 font-medium mt-1">{cityRes.error}</p>
+                              )}
                             </div>
                             <div className="space-y-1.5">
                               <Label>Postal code <span className="text-gray-400">(optional)</span></Label>
                               <Input
                                 value={shippingAddress.zipCode}
                                 onChange={(e) => setShippingAddress((p) => ({ ...p, zipCode: e.target.value }))}
+                                onBlur={() => markTouched('zipCode')}
                                 placeholder="1000"
+                                className={cn(touched.zipCode && !zipRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                               />
+                              {touched.zipCode && !zipRes.isValid && (
+                                <p className="text-xs text-red-500 font-medium mt-1">{zipRes.error}</p>
+                              )}
                             </div>
                           </>
                         )}
@@ -1150,8 +1245,13 @@ export default function CheckoutPage() {
                           <PhoneInput
                             value={shippingAddress.phone}
                             onChange={(val) => setShippingAddress((p) => ({ ...p, phone: val }))}
+                            onBlur={() => markTouched('phone')}
                             countryName={shippingAddress.country}
+                            error={touched.phone && !phoneRes.isValid}
                           />
+                          {touched.phone && !phoneRes.isValid && (
+                            <p className="text-xs text-red-500 font-medium mt-1">{phoneRes.error}</p>
+                          )}
                         </div>
                       </div>
 
@@ -1168,12 +1268,12 @@ export default function CheckoutPage() {
                     </div>
 
                     <Button
-                      onClick={() => setStep(1)}
-                      disabled={!isContactValid || !isShippingValid}
-                      className="w-full mt-4 h-11 bg-violet-600 hover:bg-violet-700"
+                      onClick={handleContinueToShipping}
+                      className="w-full mt-4 h-11 bg-violet-600 hover:bg-violet-700 font-semibold"
                     >
                       Continue to shipping <ChevronRight className="ml-2 w-4 h-4" />
                     </Button>
+
                   </motion.div>
                 )}
 
