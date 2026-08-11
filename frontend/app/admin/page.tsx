@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, ShoppingBag, DollarSign, TrendingUp, TrendingDown, Package, BarChart2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, TooltipProps,
+  ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,10 +25,16 @@ const RANGE_OPTIONS = [
 type RangeLabel = typeof RANGE_OPTIONS[number]['label'];
 
 // Custom rich tooltip
-function RevTooltip({ active, payload, label, currency }: TooltipProps<number, string> & { currency: string }) {
+interface RevTooltipProps {
+  active?: boolean;
+  payload?: Array<{ dataKey?: string; value?: number | string }>;
+  label?: string;
+  currency: string;
+}
+function RevTooltip({ active, payload, label, currency }: RevTooltipProps) {
   if (!active || !payload?.length) return null;
-  const rev = payload.find((p) => p.dataKey === 'revenue')?.value ?? 0;
-  const ord = payload.find((p) => p.dataKey === 'orders')?.value ?? 0;
+  const rev = Number(payload.find((p) => p.dataKey === 'revenue')?.value ?? 0);
+  const ord = Number(payload.find((p) => p.dataKey === 'orders')?.value ?? 0);
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xl p-4 min-w-[170px]">
       <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">{label}</p>
