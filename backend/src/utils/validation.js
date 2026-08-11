@@ -1,4 +1,4 @@
-// Server-side input validation utilities for real data enforcement and country compatibility
+// Server-side input validation utilities for real data enforcement, country compatibility, and City-ZIP cross-validation
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   'test.com', 'example.com', 'foo.com', 'bar.com', 'asdf.com', 'fake.com',
@@ -39,6 +39,13 @@ const US_EXCLUSIVE_CITIES = new Set([
   'atlanta', 'omaha', 'colorado springs', 'raleigh', 'long beach',
   'virginia beach', 'miami', 'oakland', 'minneapolis', 'tampa', 'tulsa',
   'arlington', 'new orleans', 'wichita', 'cleveland', 'orlando'
+]);
+
+const STREET_DESIGNATORS = new Set([
+  'street', 'st', 'avenue', 'ave', 'road', 'rd', 'boulevard', 'blvd',
+  'drive', 'dr', 'lane', 'ln', 'way', 'place', 'pl', 'court', 'ct',
+  'circle', 'cir', 'parkway', 'pkwy', 'highway', 'hwy', 'kebele',
+  'house', 'block', 'apt', 'suite', 'unit', 'building', 'bldg', 'floor', 'fl'
 ]);
 
 function validateEmail(email) {
@@ -112,7 +119,22 @@ function validatePhone(phone, country) {
   if (isUSorCA && (targetCountry === 'United States' || targetCountry === 'Canada')) {
     let localDigits = digitsOnly;
     if (localDigits.length === 11 && localDigits.startsWith('1')) localDigits = localDigits.slice(1);
-    if (localDigits.length !== 10) return { isValid: false, error: `${targetCountry} phone number must be 10 digits (area code + number)` };
+    if (localDigits.length !== 10) return { isValid: false, error: `${targetCountry} phone number must be 10 digits (area code + 7 digits)` };
+
+    const areaCode = localDigits.slice(0, 3);
+    const exchangeCode = localDigits.slice(3, 6);
+
+    if (areaCode.startsWith('0') || areaCode.startsWith('1')) {
+      return { isValid: false, error: `Invalid ${targetCountry} area code (${areaCode}): area code cannot start with 0 or 1` };
+    }
+
+    if (exchangeCode.startsWith('0') || exchangeCode.startsWith('1')) {
+      return { isValid: false, error: `Invalid ${targetCountry} phone exchange code (${exchangeCode}): exchange cannot start with 0 or 1` };
+    }
+
+    if (exchangeCode === '555') {
+      return { isValid: false, error: `Exchange 555 numbers are fictitious test numbers` };
+    }
   }
 
   return { isValid: true };
@@ -125,6 +147,10 @@ function validateStreet(street, country) {
 
   const lower = trimmed.toLowerCase();
   const targetCountry = (country || 'Ethiopia').trim();
+
+  if (/^[a-zA-Z]{1,3}$/.test(trimmed)) {
+    return { isValid: false, error: `"${trimmed}" is not a valid street address. Please enter a full street address (e.g. 1600 Pennsylvania Ave NW)` };
+  }
 
   const DUMMY_STREETS = ['addis', 'china', 'street', 'address', 'test', 'asdf', '12345', 'house', 'home', 'road', 'none', 'n/a'];
   if (DUMMY_STREETS.includes(lower)) return { isValid: false, error: 'Please provide a complete street address' };
@@ -139,36 +165,49 @@ function validateStreet(street, country) {
     }
   }
 
-  const hasSpace = /\s/.test(trimmed);
-  const hasDigitsAndLetters = /\d/.test(trimmed) && /[a-zA-Z\u1200-\u137F]/.test(trimmed);
+  const words = lower.split(/\s+/);
+  const hasDigit = /\d/.test(trimmed);
+  const hasDesignator = words.some((w) => STREET_DESIGNATORS.has(w));
 
-  if (!hasSpace && !hasDigitsAndLetters) {
-    return { isValid: false, error: 'Please enter a complete street address with building number or street name' };
+  if (!hasDigit && !hasDesignator && words.length < 2) {
+    return { isValid: false, error: 'Please enter a complete street address with building number or street type (e.g. 123 Main St)' };
   }
 
   return { isValid: true };
 }
 
 function validateCity(city, country) {
-  const trimmed = (city || '').trim();
+  let trimmed = (city || '').trim();
   if (!trimmed) return { isValid: false, error: 'City is required' };
-  if (trimmed.length < 2) return { isValid: false, error: 'City name must be at least 2 characters' };
-
-  const cityRegex = /^[a-zA-Z\u1200-\u137F\s'-]+$/;
-  if (!cityRegex.test(trimmed)) return { isValid: false, error: 'City must contain valid letters only' };
 
   const lower = trimmed.toLowerCase();
   const targetCountry = (country || 'Ethiopia').trim();
 
-  if (targetCountry && lower === targetCountry.toLowerCase()) {
+  if (lower === 'dc' && targetCountry === 'United States') {
+    trimmed = 'Washington DC';
+  } else if (lower === 'ny' || lower === 'nyc') {
+    trimmed = 'New York';
+  } else if (lower === 'la') {
+    trimmed = 'Los Angeles';
+  } else if (lower === 'sf') {
+    trimmed = 'San Francisco';
+  }
+
+  if (trimmed.length < 2) return { isValid: false, error: 'City name must be at least 2 characters' };
+
+  const cityRegex = /^[a-zA-Z\u1200-\u137F\s',.-]+$/;
+  if (!cityRegex.test(trimmed)) return { isValid: false, error: 'City must contain valid letters only' };
+
+  const normLower = trimmed.toLowerCase();
+  if (targetCountry && normLower === targetCountry.toLowerCase()) {
     return { isValid: false, error: `City name cannot be identical to country name (${targetCountry})` };
   }
 
   const DUMMY_CITIES = ['test', 'city', 'asdf', 'qwerty', 'xxx', 'na', 'n/a', 'none', '123'];
-  if (DUMMY_CITIES.includes(lower)) return { isValid: false, error: 'Please enter a valid city name' };
+  if (DUMMY_CITIES.includes(normLower)) return { isValid: false, error: 'Please enter a valid city name' };
 
   if (targetCountry !== 'Ethiopia') {
-    if (ETHIOPIAN_LOCATIONS.has(lower) || Array.from(ETHIOPIAN_LOCATIONS).some((loc) => lower.includes(loc))) {
+    if (ETHIOPIAN_LOCATIONS.has(normLower) || Array.from(ETHIOPIAN_LOCATIONS).some((loc) => normLower.includes(loc))) {
       return {
         isValid: false,
         error: `"${trimmed}" is an Ethiopian city and cannot be used for ${targetCountry} delivery. Please enter a city in ${targetCountry}.`
@@ -176,20 +215,21 @@ function validateCity(city, country) {
     }
   }
 
-  if (targetCountry !== 'United Kingdom' && UK_EXCLUSIVE_CITIES.has(lower)) {
+  if (targetCountry !== 'United Kingdom' && UK_EXCLUSIVE_CITIES.has(normLower)) {
     return { isValid: false, error: `"${trimmed}" is a UK city and cannot be used for ${targetCountry} delivery.` };
   }
 
-  if (targetCountry !== 'United States' && US_EXCLUSIVE_CITIES.has(lower)) {
+  if (targetCountry !== 'United States' && US_EXCLUSIVE_CITIES.has(normLower)) {
     return { isValid: false, error: `"${trimmed}" is a US city and cannot be used for ${targetCountry} delivery.` };
   }
 
   return { isValid: true };
 }
 
-function validateZipCode(zip, country) {
+function validateZipCode(zip, country, city) {
   const trimmed = (zip || '').trim();
   const targetCountry = (country || 'Ethiopia').trim();
+  const targetCity = (city || '').trim().toLowerCase();
 
   if (targetCountry === 'Ethiopia' && !trimmed) return { isValid: true };
 
@@ -209,10 +249,27 @@ function validateZipCode(zip, country) {
     return { isValid: false, error: 'Please enter a real postal code' };
   }
 
+  if (targetCountry === 'United States' && /^[1-9]0000$/.test(trimmed)) {
+    return { isValid: false, error: `"${trimmed}" is an unassigned USPS postal code. Valid US ZIP codes are specific to deliverable city areas.` };
+  }
+
   if (targetCountry === 'United Kingdom') {
     const ukPostcodeRegex = /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/;
     if (!ukPostcodeRegex.test(trimmed)) {
       return { isValid: false, error: `"${trimmed}" is not a valid UK postcode. UK postcodes contain letters & numbers (e.g. SW1A 1AA, M1 1AE, W1D 3BF).` };
+    }
+
+    if (targetCity) {
+      const outward = trimmed.toUpperCase().split(' ')[0];
+      if ((targetCity.includes('london') || targetCity === 'london') && !/^(EC|WC|E|N|NW|SE|SW|W)\d/.test(outward)) {
+        return { isValid: false, error: `Postcode "${trimmed}" does not match City 'London' (London postcodes start with EC, WC, E, N, NW, SE, SW, or W)` };
+      }
+      if (targetCity.includes('manchester') && !outward.startsWith('M')) {
+        return { isValid: false, error: `Postcode "${trimmed}" does not match City 'Manchester' (Manchester postcodes start with M)` };
+      }
+      if (targetCity.includes('birmingham') && !outward.startsWith('B')) {
+        return { isValid: false, error: `Postcode "${trimmed}" does not match City 'Birmingham' (Birmingham postcodes start with B)` };
+      }
     }
   }
 
@@ -220,6 +277,40 @@ function validateZipCode(zip, country) {
     const usZipRegex = /^\d{5}(-\d{4})?$/;
     if (!usZipRegex.test(trimmed)) {
       return { isValid: false, error: `"${trimmed}" is not a valid US ZIP code. US ZIP codes must be 5 digits (e.g. 90210 or 10001-1234).` };
+    }
+
+    const zipNum = parseInt(trimmed.slice(0, 5), 10);
+
+    if (targetCity) {
+      if (targetCity.includes('dc') || targetCity.includes('washington')) {
+        if (zipNum < 20001 || zipNum > 20599) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Washington DC' (DC ZIP codes are between 20001 and 20599)` };
+        }
+      } else if (targetCity.includes('new york') || targetCity === 'nyc') {
+        if (zipNum < 10001 || zipNum > 10292) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'New York' (NYC ZIP codes are between 10001 and 10292)` };
+        }
+      } else if (targetCity.includes('los angeles') || targetCity === 'la') {
+        if (zipNum < 90001 || zipNum > 90294) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Los Angeles' (LA ZIP codes are between 90001 and 90294)` };
+        }
+      } else if (targetCity.includes('chicago')) {
+        if (zipNum < 60601 || zipNum > 60827) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Chicago' (Chicago ZIP codes are between 60601 and 60827)` };
+        }
+      } else if (targetCity.includes('houston')) {
+        if (zipNum < 77001 || zipNum > 77299) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Houston' (Houston ZIP codes are between 77001 and 77299)` };
+        }
+      } else if (targetCity.includes('miami')) {
+        if (zipNum < 33101 || zipNum > 33299) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Miami' (Miami ZIP codes are between 33101 and 33299)` };
+        }
+      } else if (targetCity.includes('san francisco') || targetCity === 'sf') {
+        if (zipNum < 94101 || zipNum > 94188) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'San Francisco' (SF ZIP codes are between 94101 and 94188)` };
+        }
+      }
     }
   }
 
@@ -261,6 +352,7 @@ function validateZipCode(zip, country) {
 function validateShippingAddress(address, isLocalPickup = false) {
   const errors = {};
   const country = address.country || 'Ethiopia';
+  const city = address.city || '';
 
   if (address.name) {
     const parts = address.name.trim().split(/\s+/);
@@ -285,10 +377,10 @@ function validateShippingAddress(address, isLocalPickup = false) {
     const streetCheck = validateStreet(address.street || '', country);
     if (!streetCheck.isValid) errors.street = streetCheck.error;
 
-    const cityCheck = validateCity(address.city || '', country);
+    const cityCheck = validateCity(city, country);
     if (!cityCheck.isValid) errors.city = cityCheck.error;
 
-    const zipCheck = validateZipCode(address.zipCode || '', country);
+    const zipCheck = validateZipCode(address.zipCode || '', country, city);
     if (!zipCheck.isValid) errors.zipCode = zipCheck.error;
   }
 

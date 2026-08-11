@@ -116,7 +116,7 @@ export default function AddressesPage() {
       return;
     }
 
-    const zipCheck = validateZipCode(form.zipCode, form.country);
+    const zipCheck = validateZipCode(form.zipCode, form.country, form.city);
     if (!zipCheck.isValid) {
       toast.error(zipCheck.error);
       return;

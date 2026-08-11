@@ -1,4 +1,4 @@
-// Data validation utilities for checking realistic input values and country compatibility
+// Data validation utilities for checking realistic input values, country compatibility, and City-ZIP cross-validation
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   'test.com', 'example.com', 'foo.com', 'bar.com', 'asdf.com', 'fake.com',
@@ -42,6 +42,14 @@ const US_EXCLUSIVE_CITIES = new Set([
   'atlanta', 'omaha', 'colorado springs', 'raleigh', 'long beach',
   'virginia beach', 'miami', 'oakland', 'minneapolis', 'tampa', 'tulsa',
   'arlington', 'new orleans', 'wichita', 'cleveland', 'orlando'
+]);
+
+// Recognized street designators for real street address validation
+const STREET_DESIGNATORS = new Set([
+  'street', 'st', 'avenue', 'ave', 'road', 'rd', 'boulevard', 'blvd',
+  'drive', 'dr', 'lane', 'ln', 'way', 'place', 'pl', 'court', 'ct',
+  'circle', 'cir', 'parkway', 'pkwy', 'highway', 'hwy', 'kebele',
+  'house', 'block', 'apt', 'suite', 'unit', 'building', 'bldg', 'floor', 'fl'
 ]);
 
 /**
@@ -114,7 +122,7 @@ export function validateName(name: string, fieldLabel = 'Name'): { isValid: bool
 }
 
 /**
- * Validates phone numbers against realistic patterns & country rules
+ * Validates phone numbers against realistic patterns & NANP/country rules
  */
 export function validatePhone(phone: string, country?: string): { isValid: boolean; error?: string } {
   const trimmed = (phone || '').trim();
@@ -140,7 +148,6 @@ export function validatePhone(phone: string, country?: string): { isValid: boole
     return { isValid: false, error: 'Please enter a real phone number' };
   }
 
-  // Country-specific phone checks
   const targetCountry = (country || 'Ethiopia').trim();
 
   // 1. Ethiopia
@@ -168,18 +175,31 @@ export function validatePhone(phone: string, country?: string): { isValid: boole
     if (localDigits.length !== 10) {
       return { isValid: false, error: 'UK phone number must have 10 digits after +44 (e.g. 7884123456)' };
     }
-    if (localDigits.startsWith('7') && localDigits.length !== 10) {
-      return { isValid: false, error: 'UK mobile number must be 10 digits starting with 7' };
-    }
   }
 
-  // 3. United States / Canada
+  // 3. United States / Canada (NANP Strict Rules)
   const isUSorCA = (targetCountry === 'United States' || targetCountry === 'Canada') && (trimmed.startsWith('+1') || digitsOnly.length === 10 || digitsOnly.startsWith('1'));
   if (isUSorCA && (targetCountry === 'United States' || targetCountry === 'Canada')) {
     let localDigits = digitsOnly;
     if (localDigits.length === 11 && localDigits.startsWith('1')) localDigits = localDigits.slice(1);
+
     if (localDigits.length !== 10) {
-      return { isValid: false, error: `${targetCountry} phone number must be 10 digits (area code + number)` };
+      return { isValid: false, error: `${targetCountry} phone number must be 10 digits (area code + 7 digits)` };
+    }
+
+    const areaCode = localDigits.slice(0, 3);
+    const exchangeCode = localDigits.slice(3, 6);
+
+    if (areaCode.startsWith('0') || areaCode.startsWith('1')) {
+      return { isValid: false, error: `Invalid ${targetCountry} area code (${areaCode}): area code cannot start with 0 or 1` };
+    }
+
+    if (exchangeCode.startsWith('0') || exchangeCode.startsWith('1')) {
+      return { isValid: false, error: `Invalid ${targetCountry} phone exchange code (${exchangeCode}): exchange cannot start with 0 or 1` };
+    }
+
+    if (exchangeCode === '555') {
+      return { isValid: false, error: `Exchange 555 numbers are fictitious test numbers` };
     }
   }
 
@@ -187,7 +207,7 @@ export function validatePhone(phone: string, country?: string): { isValid: boole
 }
 
 /**
- * Validates detailed street address and checks country compatibility
+ * Validates detailed street address and checks country & street designators
  */
 export function validateStreet(street: string, country?: string): { isValid: boolean; error?: string } {
   const trimmed = (street || '').trim();
@@ -201,6 +221,11 @@ export function validateStreet(street: string, country?: string): { isValid: boo
 
   const lower = trimmed.toLowerCase();
   const targetCountry = (country || 'Ethiopia').trim();
+
+  // Reject short 2-3 character non-address abbreviations (e.g. "dc", "ny", "la", "sf")
+  if (/^[a-zA-Z]{1,3}$/.test(trimmed)) {
+    return { isValid: false, error: `"${trimmed}" is not a valid street address. Please enter a full street address (e.g. 1600 Pennsylvania Ave NW)` };
+  }
 
   // Reject single-word dummy street names
   const DUMMY_STREETS = ['addis', 'china', 'street', 'address', 'test', 'asdf', '12345', 'house', 'home', 'road', 'none', 'n/a'];
@@ -219,51 +244,66 @@ export function validateStreet(street: string, country?: string): { isValid: boo
     }
   }
 
-  const hasSpace = /\s/.test(trimmed);
-  const hasDigitsAndLetters = /\d/.test(trimmed) && /[a-zA-Z\u1200-\u137F]/.test(trimmed);
+  const words = lower.split(/\s+/);
+  const hasDigit = /\d/.test(trimmed);
+  const hasDesignator = words.some((w) => STREET_DESIGNATORS.has(w));
 
-  if (!hasSpace && !hasDigitsAndLetters) {
-    return { isValid: false, error: 'Please enter a complete street address with building number or street name' };
+  // Must have a building number OR a recognized street designator (e.g., "St", "Ave", "Road", "Kebele")
+  if (!hasDigit && !hasDesignator && words.length < 2) {
+    return { isValid: false, error: 'Please enter a complete street address with building number or street type (e.g. 123 Main St)' };
   }
 
   return { isValid: true };
 }
 
 /**
- * Validates city name and enforces country compatibility
+ * Validates city name, expands known abbreviations, and enforces country compatibility
  */
 export function validateCity(city: string, country?: string): { isValid: boolean; error?: string } {
-  const trimmed = (city || '').trim();
+  let trimmed = (city || '').trim();
   if (!trimmed) {
     return { isValid: false, error: 'City is required' };
+  }
+
+  const lower = trimmed.toLowerCase();
+  const targetCountry = (country || 'Ethiopia').trim();
+
+  // Handle known 2-letter city abbreviations
+  if (lower === 'dc' && targetCountry === 'United States') {
+    trimmed = 'Washington DC';
+  } else if (lower === 'ny' || lower === 'nyc') {
+    trimmed = 'New York';
+  } else if (lower === 'la') {
+    trimmed = 'Los Angeles';
+  } else if (lower === 'sf') {
+    trimmed = 'San Francisco';
   }
 
   if (trimmed.length < 2) {
     return { isValid: false, error: 'City name must be at least 2 characters' };
   }
 
-  const cityRegex = /^[a-zA-Z\u1200-\u137F\s'-]+$/;
+  const cityRegex = /^[a-zA-Z\u1200-\u137F\s',.-]+$/;
   if (!cityRegex.test(trimmed)) {
     return { isValid: false, error: 'City should contain letters only' };
   }
 
-  const lower = trimmed.toLowerCase();
-  const targetCountry = (country || 'Ethiopia').trim();
+  const normLower = trimmed.toLowerCase();
 
   // 1. Prevent city from being identical to country (e.g. Country: China, City: china)
-  if (targetCountry && lower === targetCountry.toLowerCase()) {
+  if (targetCountry && normLower === targetCountry.toLowerCase()) {
     return { isValid: false, error: `City name cannot be identical to country name (${targetCountry})` };
   }
 
   // 2. Reject dummy city strings
   const DUMMY_CITIES = ['test', 'city', 'asdf', 'qwerty', 'xxx', 'na', 'n/a', 'none', '123'];
-  if (DUMMY_CITIES.includes(lower)) {
+  if (DUMMY_CITIES.includes(normLower)) {
     return { isValid: false, error: 'Please enter a valid city name' };
   }
 
   // 3. Country mismatch check: Ethiopian cities entered for non-Ethiopian countries
   if (targetCountry !== 'Ethiopia') {
-    if (ETHIOPIAN_LOCATIONS.has(lower) || Array.from(ETHIOPIAN_LOCATIONS).some((loc) => lower.includes(loc))) {
+    if (ETHIOPIAN_LOCATIONS.has(normLower) || Array.from(ETHIOPIAN_LOCATIONS).some((loc) => normLower.includes(loc))) {
       return {
         isValid: false,
         error: `"${trimmed}" is an Ethiopian city and cannot be used for ${targetCountry} delivery. Please enter a city in ${targetCountry}.`
@@ -272,7 +312,7 @@ export function validateCity(city: string, country?: string): { isValid: boolean
   }
 
   // 4. UK mismatch check: UK city entered for non-UK country
-  if (targetCountry !== 'United Kingdom' && UK_EXCLUSIVE_CITIES.has(lower)) {
+  if (targetCountry !== 'United Kingdom' && UK_EXCLUSIVE_CITIES.has(normLower)) {
     return {
       isValid: false,
       error: `"${trimmed}" is a UK city and cannot be used for ${targetCountry} delivery.`
@@ -280,7 +320,7 @@ export function validateCity(city: string, country?: string): { isValid: boolean
   }
 
   // 5. US mismatch check: US city entered for non-US country
-  if (targetCountry !== 'United States' && US_EXCLUSIVE_CITIES.has(lower)) {
+  if (targetCountry !== 'United States' && US_EXCLUSIVE_CITIES.has(normLower)) {
     return {
       isValid: false,
       error: `"${trimmed}" is a US city and cannot be used for ${targetCountry} delivery.`
@@ -291,18 +331,18 @@ export function validateCity(city: string, country?: string): { isValid: boolean
 }
 
 /**
- * Validates postal code format matching the selected country
+ * Validates postal code format and checks City-to-ZIP cross-compatibility
  */
-export function validateZipCode(zip: string, country?: string): { isValid: boolean; error?: string } {
+export function validateZipCode(zip: string, country?: string, city?: string): { isValid: boolean; error?: string } {
   const trimmed = (zip || '').trim();
   const targetCountry = (country || 'Ethiopia').trim();
+  const targetCity = (city || '').trim().toLowerCase();
 
   // If Ethiopia, postal code is optional
   if (targetCountry === 'Ethiopia' && !trimmed) {
     return { isValid: true };
   }
 
-  // For international delivery, postal code is required for UK, US, Canada, China, EU, etc.
   const REQUIRES_POSTCODE = new Set([
     'United Kingdom', 'United States', 'Canada', 'China', 'Germany', 'France',
     'Italy', 'Spain', 'Australia', 'Netherlands', 'Japan', 'Brazil'
@@ -316,7 +356,6 @@ export function validateZipCode(zip: string, country?: string): { isValid: boole
     return { isValid: true };
   }
 
-  // Basic sanity check
   if (trimmed.length < 3 || trimmed.length > 10) {
     return { isValid: false, error: 'Postal code must be between 3 and 10 characters' };
   }
@@ -325,9 +364,14 @@ export function validateZipCode(zip: string, country?: string): { isValid: boole
     return { isValid: false, error: 'Please enter a real postal code' };
   }
 
-  // Country-specific postal code format checks:
+  // Unassigned 000 round numbers check for US (10000, 20000, 30000, etc.)
+  if (targetCountry === 'United States' && /^[1-9]0000$/.test(trimmed)) {
+    return { isValid: false, error: `"${trimmed}" is an unassigned USPS postal code. Valid US ZIP codes are specific to deliverable city areas.` };
+  }
 
-  // 1. United Kingdom: e.g., SW1A 1AA, W1D 3BF, M1 1AE, EC1A 1BB
+  // Country-specific postal code format and City-ZIP cross-checks:
+
+  // 1. United Kingdom
   if (targetCountry === 'United Kingdom') {
     const ukPostcodeRegex = /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/;
     if (!ukPostcodeRegex.test(trimmed)) {
@@ -336,9 +380,22 @@ export function validateZipCode(zip: string, country?: string): { isValid: boole
         error: `"${trimmed}" is not a valid UK postcode. UK postcodes contain letters & numbers (e.g. SW1A 1AA, M1 1AE, W1D 3BF).`
       };
     }
+
+    if (targetCity) {
+      const outward = trimmed.toUpperCase().split(' ')[0];
+      if ((targetCity.includes('london') || targetCity === 'london') && !/^(EC|WC|E|N|NW|SE|SW|W)\d/.test(outward)) {
+        return { isValid: false, error: `Postcode "${trimmed}" does not match City 'London' (London postcodes start with EC, WC, E, N, NW, SE, SW, or W)` };
+      }
+      if (targetCity.includes('manchester') && !outward.startsWith('M')) {
+        return { isValid: false, error: `Postcode "${trimmed}" does not match City 'Manchester' (Manchester postcodes start with M)` };
+      }
+      if (targetCity.includes('birmingham') && !outward.startsWith('B')) {
+        return { isValid: false, error: `Postcode "${trimmed}" does not match City 'Birmingham' (Birmingham postcodes start with B)` };
+      }
+    }
   }
 
-  // 2. United States: 5 digits or ZIP+4 (e.g. 90210 or 10001-1234)
+  // 2. United States (ZIP & City-ZIP Cross Check)
   if (targetCountry === 'United States') {
     const usZipRegex = /^\d{5}(-\d{4})?$/;
     if (!usZipRegex.test(trimmed)) {
@@ -346,6 +403,40 @@ export function validateZipCode(zip: string, country?: string): { isValid: boole
         isValid: false,
         error: `"${trimmed}" is not a valid US ZIP code. US ZIP codes must be 5 digits (e.g. 90210 or 10001-1234).`
       };
+    }
+
+    const zipNum = parseInt(trimmed.slice(0, 5), 10);
+
+    if (targetCity) {
+      if (targetCity.includes('dc') || targetCity.includes('washington')) {
+        if (zipNum < 20001 || zipNum > 20599) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Washington DC' (DC ZIP codes are between 20001 and 20599)` };
+        }
+      } else if (targetCity.includes('new york') || targetCity === 'nyc') {
+        if (zipNum < 10001 || zipNum > 10292) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'New York' (NYC ZIP codes are between 10001 and 10292)` };
+        }
+      } else if (targetCity.includes('los angeles') || targetCity === 'la') {
+        if (zipNum < 90001 || zipNum > 90294) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Los Angeles' (LA ZIP codes are between 90001 and 90294)` };
+        }
+      } else if (targetCity.includes('chicago')) {
+        if (zipNum < 60601 || zipNum > 60827) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Chicago' (Chicago ZIP codes are between 60601 and 60827)` };
+        }
+      } else if (targetCity.includes('houston')) {
+        if (zipNum < 77001 || zipNum > 77299) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Houston' (Houston ZIP codes are between 77001 and 77299)` };
+        }
+      } else if (targetCity.includes('miami')) {
+        if (zipNum < 33101 || zipNum > 33299) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'Miami' (Miami ZIP codes are between 33101 and 33299)` };
+        }
+      } else if (targetCity.includes('san francisco') || targetCity === 'sf') {
+        if (zipNum < 94101 || zipNum > 94188) {
+          return { isValid: false, error: `ZIP code ${trimmed} does not match City 'San Francisco' (SF ZIP codes are between 94101 and 94188)` };
+        }
+      }
     }
   }
 
