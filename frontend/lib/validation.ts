@@ -1,4 +1,4 @@
-// Data validation utilities for checking realistic input values, country compatibility, and City-ZIP cross-validation
+// Data validation utilities for checking realistic input values, country compatibility, City-ZIP cross-validation, and global phone verification
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   'test.com', 'example.com', 'foo.com', 'bar.com', 'asdf.com', 'fake.com',
@@ -122,7 +122,7 @@ export function validateName(name: string, fieldLabel = 'Name'): { isValid: bool
 }
 
 /**
- * Validates phone numbers against realistic patterns & NANP/country rules
+ * Universal & Worldwide Real Phone Number Validation (All Countries)
  */
 export function validatePhone(phone: string, country?: string): { isValid: boolean; error?: string } {
   const trimmed = (phone || '').trim();
@@ -131,75 +131,203 @@ export function validatePhone(phone: string, country?: string): { isValid: boole
   }
 
   const digitsOnly = trimmed.replace(/\D/g, '');
+  const cLower = (country || 'Ethiopia').trim().toLowerCase();
 
-  if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-    return { isValid: false, error: 'Phone number must be between 7 and 15 digits' };
+  const isEthiopia = cLower === 'ethiopia' || cLower === 'et' || trimmed.startsWith('+251') || digitsOnly.startsWith('251');
+  const isUS = cLower === 'united states' || cLower === 'us' || cLower === 'usa';
+  const isCanada = cLower === 'canada' || cLower === 'ca';
+  const isUK = cLower === 'united kingdom' || cLower === 'uk' || cLower === 'gb' || trimmed.startsWith('+44');
+  const isChina = cLower === 'china' || cLower === 'cn' || trimmed.startsWith('+86');
+  const isIndia = cLower === 'india' || cLower === 'in' || trimmed.startsWith('+91');
+  const isKenya = cLower === 'kenya' || cLower === 'ke' || trimmed.startsWith('+254');
+  const isNigeria = cLower === 'nigeria' || cLower === 'ng' || trimmed.startsWith('+234');
+  const isUAE = cLower === 'united arab emirates' || cLower === 'uae' || trimmed.startsWith('+971');
+  const isGermany = cLower === 'germany' || cLower === 'de' || trimmed.startsWith('+49');
+  const isFrance = cLower === 'france' || cLower === 'fr' || trimmed.startsWith('+33');
+  const isAustralia = cLower === 'australia' || cLower === 'au' || trimmed.startsWith('+61');
+
+  // Determine dial code
+  let dialCode = '';
+  if (isEthiopia) dialCode = '251';
+  else if (isUS || isCanada) dialCode = '1';
+  else if (isUK) dialCode = '44';
+  else if (isChina) dialCode = '86';
+  else if (isIndia) dialCode = '91';
+  else if (isKenya) dialCode = '254';
+  else if (isNigeria) dialCode = '234';
+  else if (isUAE) dialCode = '971';
+  else if (isGermany) dialCode = '49';
+  else if (isFrance) dialCode = '33';
+  else if (isAustralia) dialCode = '61';
+
+  // Separate dial code from national subscriber number
+  let subscriberDigits = digitsOnly;
+  if (dialCode && digitsOnly.startsWith(dialCode)) {
+    subscriberDigits = digitsOnly.slice(dialCode.length);
   }
 
-  if (/^(\d)\1+$/.test(digitsOnly)) {
+  // Check for redundant leading zero after dial code (e.g. +44 07... or +251 09...)
+  if (dialCode && digitsOnly.startsWith(dialCode) && subscriberDigits.startsWith('0')) {
+    return { isValid: false, error: `Please remove the leading 0 after the country code (+${dialCode})` };
+  }
+
+  // Strip leading 0 on national number if present
+  if (subscriberDigits.startsWith('0') && subscriberDigits.length > 7) {
+    subscriberDigits = subscriberDigits.slice(1);
+  }
+
+  // Length check: Subscriber digits must be between 6 and 12 digits (or 7-15 total)
+  if (digitsOnly.length < 7 || digitsOnly.length > 15 || subscriberDigits.length < 6) {
+    return { isValid: false, error: `Phone number is invalid (too short or too long)` };
+  }
+
+  // 1. Rejections for dummy repeating numbers (e.g. 0000000, 55555555, 9999999)
+  if (/^(\d)\1+$/.test(subscriberDigits) || /^(\d)\1+$/.test(digitsOnly)) {
     return { isValid: false, error: 'Please enter a valid, non-repetitive phone number' };
   }
 
-  if (/(.)\1{4,}/.test(digitsOnly)) {
-    return { isValid: false, error: 'Please enter a valid phone number (too many repeated digits)' };
+  // 2. Max 4 consecutive identical digits allowed anywhere (rejects 55555, 00000, 999999)
+  if (/(.)\1{4,}/.test(subscriberDigits)) {
+    return { isValid: false, error: 'Phone number contains too many repeated consecutive digits' };
   }
 
-  if ('1234567890987654321'.includes(digitsOnly)) {
+  // 3. Unique digit count (entropy): Subscriber number >= 7 digits must have at least 4 unique digits
+  if (subscriberDigits.length >= 7) {
+    const uniqueCount = new Set(subscriberDigits.split('')).size;
+    if (uniqueCount < 4) {
+      return { isValid: false, error: 'Please enter a real phone number (insufficient digit variety)' };
+    }
+  }
+
+  // 4. Sequential patterns (12345678, 98765432, 23456789)
+  if ('1234567890987654321'.includes(subscriberDigits)) {
     return { isValid: false, error: 'Please enter a real phone number' };
   }
 
-  const targetCountry = (country || 'Ethiopia').trim();
+  // 5. Repeating block patterns (123123123, 99009900)
+  if (/^(\d{2,4})\1+$/.test(subscriberDigits)) {
+    return { isValid: false, error: 'Please enter a real phone number' };
+  }
 
-  // 1. Ethiopia
-  const isEthiopia = targetCountry === 'Ethiopia' || trimmed.startsWith('+251') || digitsOnly.startsWith('251');
+  // ─── Country-Specific National Mobile/Landline Rules ───
+
+  // Ethiopia (+251)
   if (isEthiopia) {
-    let localDigits = digitsOnly;
-    if (localDigits.startsWith('251')) localDigits = localDigits.slice(3);
-    if (localDigits.startsWith('0')) localDigits = localDigits.slice(1);
-
-    if (localDigits.length !== 9) {
+    if (subscriberDigits.length !== 9) {
       return { isValid: false, error: 'Ethiopian mobile number must be 9 digits (e.g. 911234567)' };
     }
-    if (!localDigits.startsWith('9') && !localDigits.startsWith('7')) {
-      return { isValid: false, error: 'Ethiopian mobile numbers start with 9 or 7' };
+    if (!subscriberDigits.startsWith('9') && !subscriberDigits.startsWith('7')) {
+      return { isValid: false, error: 'Ethiopian mobile numbers must start with 9 or 7' };
     }
   }
 
-  // 2. United Kingdom
-  const isUK = targetCountry === 'United Kingdom' || trimmed.startsWith('+44') || digitsOnly.startsWith('44');
-  if (isUK && targetCountry === 'United Kingdom') {
-    let localDigits = digitsOnly;
-    if (localDigits.startsWith('44')) localDigits = localDigits.slice(2);
-    if (localDigits.startsWith('0')) localDigits = localDigits.slice(1);
+  // United States & Canada (+1 NANP)
+  if (isUS || isCanada) {
+    let localDigits = subscriberDigits;
+    if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) localDigits = digitsOnly.slice(1);
 
     if (localDigits.length !== 10) {
-      return { isValid: false, error: 'UK phone number must have 10 digits after +44 (e.g. 7884123456)' };
-    }
-  }
-
-  // 3. United States / Canada (NANP Strict Rules)
-  const isUSorCA = (targetCountry === 'United States' || targetCountry === 'Canada') && (trimmed.startsWith('+1') || digitsOnly.length === 10 || digitsOnly.startsWith('1'));
-  if (isUSorCA && (targetCountry === 'United States' || targetCountry === 'Canada')) {
-    let localDigits = digitsOnly;
-    if (localDigits.length === 11 && localDigits.startsWith('1')) localDigits = localDigits.slice(1);
-
-    if (localDigits.length !== 10) {
-      return { isValid: false, error: `${targetCountry} phone number must be 10 digits (area code + 7 digits)` };
+      return { isValid: false, error: `Phone number must be 10 digits (area code + 7 digits)` };
     }
 
     const areaCode = localDigits.slice(0, 3);
     const exchangeCode = localDigits.slice(3, 6);
 
     if (areaCode.startsWith('0') || areaCode.startsWith('1')) {
-      return { isValid: false, error: `Invalid ${targetCountry} area code (${areaCode}): area code cannot start with 0 or 1` };
+      return { isValid: false, error: `Invalid area code (${areaCode}): area code cannot start with 0 or 1` };
     }
-
     if (exchangeCode.startsWith('0') || exchangeCode.startsWith('1')) {
-      return { isValid: false, error: `Invalid ${targetCountry} phone exchange code (${exchangeCode}): exchange cannot start with 0 or 1` };
+      return { isValid: false, error: `Invalid phone exchange (${exchangeCode}): exchange cannot start with 0 or 1` };
     }
-
     if (exchangeCode === '555') {
       return { isValid: false, error: `Exchange 555 numbers are fictitious test numbers` };
+    }
+  }
+
+  // United Kingdom (+44)
+  if (isUK) {
+    if (subscriberDigits.length !== 10) {
+      return { isValid: false, error: 'UK phone number must have 10 digits after +44 (e.g. 7884123456)' };
+    }
+    if (!/^[1237]/.test(subscriberDigits)) {
+      return { isValid: false, error: 'UK numbers start with 7 (mobile) or 1/2/3 (landline)' };
+    }
+  }
+
+  // China (+86)
+  if (isChina) {
+    if (subscriberDigits.length !== 11) {
+      return { isValid: false, error: 'China mobile number must be 11 digits starting with 1 (e.g. 13812345678)' };
+    }
+    if (!subscriberDigits.startsWith('1')) {
+      return { isValid: false, error: 'China mobile numbers must start with 1 (e.g. 13x, 15x, 18x)' };
+    }
+  }
+
+  // India (+91)
+  if (isIndia) {
+    if (subscriberDigits.length !== 10) {
+      return { isValid: false, error: 'India mobile number must be 10 digits' };
+    }
+    if (!/^[6789]/.test(subscriberDigits)) {
+      return { isValid: false, error: 'India mobile numbers must start with 6, 7, 8, or 9' };
+    }
+  }
+
+  // Kenya (+254)
+  if (isKenya) {
+    if (subscriberDigits.length !== 9) {
+      return { isValid: false, error: 'Kenya mobile number must be 9 digits' };
+    }
+    if (!/^[71]/.test(subscriberDigits)) {
+      return { isValid: false, error: 'Kenya mobile numbers start with 7 or 1' };
+    }
+  }
+
+  // Nigeria (+234)
+  if (isNigeria) {
+    if (subscriberDigits.length !== 10) {
+      return { isValid: false, error: 'Nigeria mobile number must be 10 digits' };
+    }
+    if (!/^[789]/.test(subscriberDigits)) {
+      return { isValid: false, error: 'Nigeria mobile numbers start with 7, 8, or 9' };
+    }
+  }
+
+  // United Arab Emirates (+971)
+  if (isUAE) {
+    if (subscriberDigits.length !== 9) {
+      return { isValid: false, error: 'UAE mobile number must be 9 digits (e.g. 501234567)' };
+    }
+    if (!subscriberDigits.startsWith('5')) {
+      return { isValid: false, error: 'UAE mobile numbers start with 5 (e.g. 50, 52, 54, 55, 56)' };
+    }
+  }
+
+  // Germany (+49)
+  if (isGermany) {
+    if (subscriberDigits.length < 10 || subscriberDigits.length > 11) {
+      return { isValid: false, error: 'German phone number must be 10 to 11 digits' };
+    }
+  }
+
+  // France (+33)
+  if (isFrance) {
+    if (subscriberDigits.length !== 9) {
+      return { isValid: false, error: 'France phone number must be 9 digits' };
+    }
+    if (!/^[1-7]/.test(subscriberDigits)) {
+      return { isValid: false, error: 'France phone numbers start with 6/7 (mobile) or 1-5 (landline)' };
+    }
+  }
+
+  // Australia (+61)
+  if (isAustralia) {
+    if (subscriberDigits.length !== 9) {
+      return { isValid: false, error: 'Australia phone number must be 9 digits' };
+    }
+    if (!/^[42378]/.test(subscriberDigits)) {
+      return { isValid: false, error: 'Australia mobile numbers start with 4' };
     }
   }
 
@@ -248,7 +376,6 @@ export function validateStreet(street: string, country?: string): { isValid: boo
   const hasDigit = /\d/.test(trimmed);
   const hasDesignator = words.some((w) => STREET_DESIGNATORS.has(w));
 
-  // Must have a building number OR a recognized street designator (e.g., "St", "Ave", "Road", "Kebele")
   if (!hasDigit && !hasDesignator && words.length < 2) {
     return { isValid: false, error: 'Please enter a complete street address with building number or street type (e.g. 123 Main St)' };
   }
@@ -290,18 +417,15 @@ export function validateCity(city: string, country?: string): { isValid: boolean
 
   const normLower = trimmed.toLowerCase();
 
-  // 1. Prevent city from being identical to country (e.g. Country: China, City: china)
   if (targetCountry && normLower === targetCountry.toLowerCase()) {
     return { isValid: false, error: `City name cannot be identical to country name (${targetCountry})` };
   }
 
-  // 2. Reject dummy city strings
   const DUMMY_CITIES = ['test', 'city', 'asdf', 'qwerty', 'xxx', 'na', 'n/a', 'none', '123'];
   if (DUMMY_CITIES.includes(normLower)) {
     return { isValid: false, error: 'Please enter a valid city name' };
   }
 
-  // 3. Country mismatch check: Ethiopian cities entered for non-Ethiopian countries
   if (targetCountry !== 'Ethiopia') {
     if (ETHIOPIAN_LOCATIONS.has(normLower) || Array.from(ETHIOPIAN_LOCATIONS).some((loc) => normLower.includes(loc))) {
       return {
@@ -311,7 +435,6 @@ export function validateCity(city: string, country?: string): { isValid: boolean
     }
   }
 
-  // 4. UK mismatch check: UK city entered for non-UK country
   if (targetCountry !== 'United Kingdom' && UK_EXCLUSIVE_CITIES.has(normLower)) {
     return {
       isValid: false,
@@ -319,7 +442,6 @@ export function validateCity(city: string, country?: string): { isValid: boolean
     };
   }
 
-  // 5. US mismatch check: US city entered for non-US country
   if (targetCountry !== 'United States' && US_EXCLUSIVE_CITIES.has(normLower)) {
     return {
       isValid: false,
@@ -338,7 +460,6 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
   const targetCountry = (country || 'Ethiopia').trim();
   const targetCity = (city || '').trim().toLowerCase();
 
-  // If Ethiopia, postal code is optional
   if (targetCountry === 'Ethiopia' && !trimmed) {
     return { isValid: true };
   }
@@ -364,14 +485,11 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     return { isValid: false, error: 'Please enter a real postal code' };
   }
 
-  // Unassigned 000 round numbers check for US (10000, 20000, 30000, etc.)
   if (targetCountry === 'United States' && /^[1-9]0000$/.test(trimmed)) {
     return { isValid: false, error: `"${trimmed}" is an unassigned USPS postal code. Valid US ZIP codes are specific to deliverable city areas.` };
   }
 
-  // Country-specific postal code format and City-ZIP cross-checks:
-
-  // 1. United Kingdom
+  // United Kingdom
   if (targetCountry === 'United Kingdom') {
     const ukPostcodeRegex = /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}$/;
     if (!ukPostcodeRegex.test(trimmed)) {
@@ -395,7 +513,7 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     }
   }
 
-  // 2. United States (ZIP & City-ZIP Cross Check)
+  // United States
   if (targetCountry === 'United States') {
     const usZipRegex = /^\d{5}(-\d{4})?$/;
     if (!usZipRegex.test(trimmed)) {
@@ -440,7 +558,7 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     }
   }
 
-  // 3. Canada: A1A 1A1 format
+  // Canada
   if (targetCountry === 'Canada') {
     const caPostalRegex = /^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/;
     if (!caPostalRegex.test(trimmed)) {
@@ -451,7 +569,7 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     }
   }
 
-  // 4. China: 6 digits
+  // China
   if (targetCountry === 'China') {
     const cnZipRegex = /^\d{6}$/;
     if (!cnZipRegex.test(trimmed)) {
@@ -462,7 +580,7 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     }
   }
 
-  // 5. Germany / France / Spain / Italy: 5 digits
+  // Germany / France / Spain / Italy
   if (['Germany', 'France', 'Spain', 'Italy'].includes(targetCountry)) {
     if (!/^\d{5}$/.test(trimmed)) {
       return {
@@ -472,7 +590,7 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     }
   }
 
-  // 6. Australia: 4 digits
+  // Australia
   if (targetCountry === 'Australia') {
     if (!/^\d{4}$/.test(trimmed)) {
       return {
@@ -482,7 +600,7 @@ export function validateZipCode(zip: string, country?: string, city?: string): {
     }
   }
 
-  // 7. Ethiopia: 4 digits if entered
+  // Ethiopia
   if (targetCountry === 'Ethiopia') {
     if (!/^\d{4}$/.test(trimmed)) {
       return {
