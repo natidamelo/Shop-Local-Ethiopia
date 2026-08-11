@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle, CreditCard, MapPin, ShoppingBag, ChevronRight,
-  Lock, Tag, ChevronDown, Zap, LogIn, Mail, Truck, X, Store
+  Lock, Tag, ChevronDown, Zap, LogIn, Mail, Truck, X, Store, AlertCircle
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -1121,7 +1122,10 @@ export default function CheckoutPage() {
                             className={cn(touched.email && !emailRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                           />
                           {touched.email && !emailRes.isValid && (
-                            <p className="text-xs text-red-500 font-medium mt-1">{emailRes.error}</p>
+                            <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" />
+                              <span>{emailRes.error}</span>
+                            </p>
                           )}
                         </div>
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -1172,7 +1176,10 @@ export default function CheckoutPage() {
                               className={cn(touched.firstName && !fnRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                             />
                             {touched.firstName && !fnRes.isValid && (
-                              <p className="text-xs text-red-500 font-medium mt-1">{fnRes.error}</p>
+                              <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1.5">
+                                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" />
+                                <span>{fnRes.error}</span>
+                              </p>
                             )}
                           </div>
                           <div className="space-y-1.5">
@@ -1185,7 +1192,10 @@ export default function CheckoutPage() {
                               className={cn(touched.lastName && !lnRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                             />
                             {touched.lastName && !lnRes.isValid && (
-                              <p className="text-xs text-red-500 font-medium mt-1">{lnRes.error}</p>
+                              <p className="text-xs text-red-500 font-medium mt-1 flex items-center gap-1.5">
+                                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" />
+                                <span>{lnRes.error}</span>
+                              </p>
                             )}
                           </div>
                         </div>
@@ -1201,7 +1211,10 @@ export default function CheckoutPage() {
                                 className={cn(touched.street && !streetRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                               />
                               {touched.street && !streetRes.isValid && (
-                                <p className="text-xs text-red-500 font-medium mt-1">{streetRes.error}</p>
+                                <p className="text-xs text-red-500 font-medium mt-1 flex items-start gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500 mt-0.5" />
+                                  <span>{streetRes.error}</span>
+                                </p>
                               )}
                             </div>
                             <div className="col-span-2 space-y-1.5">
@@ -1222,7 +1235,10 @@ export default function CheckoutPage() {
                                 className={cn(touched.city && !cityRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                               />
                               {touched.city && !cityRes.isValid && (
-                                <p className="text-xs text-red-500 font-medium mt-1">{cityRes.error}</p>
+                                <p className="text-xs text-red-500 font-medium mt-1 flex items-start gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500 mt-0.5" />
+                                  <span>{cityRes.error}</span>
+                                </p>
                               )}
                             </div>
                             <div className="space-y-1.5">
@@ -1235,7 +1251,10 @@ export default function CheckoutPage() {
                                 className={cn(touched.zipCode && !zipRes.isValid && 'border-red-500 focus-visible:ring-red-500 bg-red-50/20')}
                               />
                               {touched.zipCode && !zipRes.isValid && (
-                                <p className="text-xs text-red-500 font-medium mt-1">{zipRes.error}</p>
+                                <p className="text-xs text-red-500 font-medium mt-1 flex items-start gap-1.5">
+                                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500 mt-0.5" />
+                                  <span>{zipRes.error}</span>
+                                </p>
                               )}
                             </div>
                           </>
@@ -1250,9 +1269,13 @@ export default function CheckoutPage() {
                             error={touched.phone && !phoneRes.isValid}
                           />
                           {touched.phone && !phoneRes.isValid && (
-                            <p className="text-xs text-red-500 font-medium mt-1">{phoneRes.error}</p>
+                            <p className="text-xs text-red-500 font-medium mt-1 flex items-start gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500 mt-0.5" />
+                              <span>{phoneRes.error}</span>
+                            </p>
                           )}
                         </div>
+
                       </div>
 
                       {/* Save info */}
