@@ -69,10 +69,42 @@ const FALLBACK_SHIPPING: ShippingMethod[] = [
 ];
 
 const PAYMENT_METHODS = [
-  { id: 'stripe', name: 'Credit/Debit Card', desc: 'Visa, Mastercard, Amex' },
-  { id: 'paypal', name: 'PayPal', desc: 'Pay with PayPal account' },
-  { id: 'flutterwave', name: 'Flutterwave', desc: 'Cards, Mobile Money, Bank' },
-  { id: 'chapa', name: 'Chapa', desc: 'Telebirr, CBE, Awash, Dashen' },
+  {
+    id: 'stripe',
+    name: 'Credit / Debit Card',
+    desc: 'Visa, Mastercard, American Express',
+    badge: '🔒 Secured',
+    badgeColor: 'bg-green-100 text-green-700',
+    logos: ['VISA', 'MC', 'AMEX'],
+    global: true,
+  },
+  {
+    id: 'paypal',
+    name: 'PayPal',
+    desc: 'Pay with your PayPal account',
+    badge: 'Buyer Protection',
+    badgeColor: 'bg-blue-100 text-blue-700',
+    logos: [],
+    global: true,
+  },
+  {
+    id: 'flutterwave',
+    name: 'Flutterwave',
+    desc: 'Cards, Mobile Money, Bank Transfer',
+    badge: 'Africa & Global',
+    badgeColor: 'bg-orange-100 text-orange-700',
+    logos: [],
+    global: true,
+  },
+  {
+    id: 'chapa',
+    name: 'Chapa',
+    desc: 'Telebirr · CBE · Awash · Dashen · Amole',
+    badge: 'Ethiopia Only',
+    badgeColor: 'bg-amber-100 text-amber-700',
+    logos: [],
+    ethiopiaOnly: true,
+  },
 ];
 
 // Full world country list
@@ -781,69 +813,127 @@ export default function CheckoutPage() {
   };
 
   const handlePayment = async (confirmCard?: () => Promise<string | null>) => {
+    // Guard: ensure all required fields are valid before payment
+    if (!isShippingValid || !isContactValid) {
+      toast.error('Please complete all required fields before paying.');
+      setStep(0);
+      markAllTouched();
+      return;
+    }
+
     setLoading(true);
     try {
       const oid = orderId || (await createOrder());
       if (!oid) return;
 
       if (selectedPayment === 'stripe') {
-        const res = await api.post('/payments/stripe/create-intent', { orderId: oid });
-        const { clientSecret } = res.data.data;
+        let clientSecret: string;
+        try {
+          const res = await api.post('/payments/stripe/create-intent', { orderId: oid });
+          clientSecret = res.data.data.clientSecret;
+        } catch {
+          toast.error('Could not connect to Stripe. Please try again.');
+          setLoading(false);
+          return;
+        }
 
         if (confirmCard) {
-          // Real Stripe card collection
           const pmId = await confirmCard();
           if (!pmId) { setLoading(false); return; }
 
           const stripeInstance = await stripePromise;
-          if (!stripeInstance) { toast.error('Stripe not loaded'); setLoading(false); return; }
+          if (!stripeInstance) {
+            toast.error('Stripe is not available right now. Please try another payment method.');
+            setLoading(false);
+            return;
+          }
 
           const { error, paymentIntent } = await stripeInstance.confirmCardPayment(clientSecret, {
             payment_method: pmId,
           });
 
           if (error) {
-            toast.error(error.message || 'Payment failed');
+            toast.error(error.message || 'Card payment failed. Please check your card details.');
             setLoading(false);
             return;
           }
 
           if (paymentIntent?.status === 'succeeded') {
+            toast.success('Payment successful! 🎉');
             clearCart();
             router.push(`/checkout/success?orderId=${oid}`);
             return;
           }
         } else {
-          // Fallback: no Stripe key configured
           toast.success('Order placed! (Stripe not configured — test mode)');
           setStep(3);
           setTimeout(() => { clearCart(); router.push(`/checkout/success?orderId=${oid}`); }, 1500);
           return;
         }
+
       } else if (selectedPayment === 'paypal') {
-        const res = await api.post('/payments/paypal/create-order', { orderId: oid });
-        if (res.data.data.approvalUrl) window.location.href = res.data.data.approvalUrl;
+        try {
+          const res = await api.post('/payments/paypal/create-order', { orderId: oid });
+          const approvalUrl = res.data?.data?.approvalUrl;
+          if (approvalUrl) {
+            toast.success('Redirecting to PayPal…');
+            window.location.href = approvalUrl;
+          } else {
+            toast.error('PayPal did not return a payment URL. Please try again.');
+          }
+        } catch {
+          toast.error('PayPal payment could not be initiated. Please try again.');
+        }
+
       } else if (selectedPayment === 'flutterwave') {
-        const res = await api.post('/payments/flutterwave/initiate', {
-          orderId: oid,
-          customerEmail: contact.email || user?.email,
-          customerName: `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim() || user?.name,
-          customerPhone: shippingAddress.phone,
-        });
-        if (res.data.data.paymentLink) window.location.href = res.data.data.paymentLink;
+        try {
+          const res = await api.post('/payments/flutterwave/initiate', {
+            orderId: oid,
+            customerEmail: contact.email || user?.email,
+            customerName: `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim() || user?.name,
+            customerPhone: shippingAddress.phone,
+          });
+          const paymentLink = res.data?.data?.paymentLink;
+          if (paymentLink) {
+            toast.success('Redirecting to Flutterwave…');
+            window.location.href = paymentLink;
+          } else {
+            toast.error('Flutterwave did not return a payment link. Please try again.');
+          }
+        } catch {
+          toast.error('Flutterwave payment could not be initiated. Please try again.');
+        }
+
       } else if (selectedPayment === 'chapa') {
-        const res = await api.post('/payments/chapa/initiate', {
-          orderId: oid,
-          customerEmail: contact.email || user?.email,
-          customerFirstName: shippingAddress.firstName || user?.name?.split(' ')[0],
-          customerLastName: shippingAddress.lastName || user?.name?.split(' ').slice(1).join(' ') || 'User',
-          customerPhone: shippingAddress.phone,
-          currency: 'ETB',
-        });
-        if (res.data.data.checkoutUrl) window.location.href = res.data.data.checkoutUrl;
+        // Chapa is Ethiopia-only — guard against non-Ethiopian orders
+        if (shippingAddress.country !== 'Ethiopia') {
+          toast.error('Chapa payments are only available for Ethiopia orders. Please select another payment method.');
+          setLoading(false);
+          return;
+        }
+        try {
+          const res = await api.post('/payments/chapa/initiate', {
+            orderId: oid,
+            customerEmail: contact.email || user?.email,
+            customerFirstName: shippingAddress.firstName || user?.name?.split(' ')[0],
+            customerLastName: shippingAddress.lastName || user?.name?.split(' ').slice(1).join(' ') || 'User',
+            customerPhone: shippingAddress.phone,
+            currency: 'ETB',
+          });
+          const checkoutUrl = res.data?.data?.checkoutUrl;
+          if (checkoutUrl) {
+            toast.success('Redirecting to Chapa…');
+            window.location.href = checkoutUrl;
+          } else {
+            toast.error('Chapa did not return a checkout URL. Please try again.');
+          }
+        } catch {
+          toast.error('Chapa payment could not be initiated. Please try again.');
+        }
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Payment failed');
+      const msg = err?.response?.data?.message || err?.message || 'Payment failed. Please try again.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -1383,60 +1473,132 @@ export default function CheckoutPage() {
                 {/* ── Step 2: Payment ── */}
                 {step === 2 && (
                   <motion.div key="payment" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+
+                    {/* Security Trust Bar */}
+                    <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-100 dark:border-violet-800 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3 justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-violet-600" />
+                        <span className="text-xs font-semibold text-violet-700 dark:text-violet-300">256-bit SSL Encrypted</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {['VISA', 'MC', 'AMEX'].map((b) => (
+                          <span key={b} className="text-[10px] px-1.5 py-0.5 rounded border border-violet-200 dark:border-violet-700 text-violet-600 dark:text-violet-300 font-mono font-bold tracking-wide">{b}</span>
+                        ))}
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-600 text-white font-bold tracking-wide">Chapa</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500 text-white font-bold tracking-wide">Flutterwave</span>
+                      </div>
+                    </div>
+
                     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-                      <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-violet-600" /> Payment
+                      <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-violet-600" /> Choose Payment Method
                       </h2>
-                      <p className="text-xs text-gray-500 mb-4 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> All transactions are secure and encrypted.
-                      </p>
 
                       <div className="space-y-3">
-                        {PAYMENT_METHODS.map((method) => (
-                          <div key={method.id}>
-                            <button
-                              onClick={() => setSelectedPayment(method.id)}
-                              className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                                selectedPayment === method.id
-                                  ? 'border-violet-600 bg-violet-50 dark:bg-violet-900/20'
-                                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                  selectedPayment === method.id ? 'border-violet-600' : 'border-gray-300'
-                                }`}>
-                                  {selectedPayment === method.id && (
-                                    <div className="w-2.5 h-2.5 bg-violet-600 rounded-full" />
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <p className="font-semibold text-sm text-gray-900 dark:text-white">{method.name}</p>
-                                  <p className="text-xs text-gray-500">{method.desc}</p>
-                                </div>
-                                {method.id === 'stripe' && (
-                                  <div className="flex gap-1">
-                                    {['VISA', 'MC', 'AMEX'].map((card) => (
-                                      <span key={card} className="text-xs px-1.5 py-0.5 rounded border border-gray-200 text-gray-500 font-mono">{card}</span>
-                                    ))}
+                        {PAYMENT_METHODS
+                          .filter((m) => m.ethiopiaOnly ? shippingAddress.country === 'Ethiopia' : true)
+                          .map((method) => {
+                            const isSelected = selectedPayment === method.id;
+                            return (
+                              <div key={method.id}>
+                                <motion.button
+                                  whileHover={{ scale: 1.01 }}
+                                  whileTap={{ scale: 0.99 }}
+                                  onClick={() => setSelectedPayment(method.id)}
+                                  className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                                    isSelected
+                                      ? 'border-violet-600 bg-violet-50 dark:bg-violet-900/20 shadow-md shadow-violet-100 dark:shadow-violet-900/30'
+                                      : 'border-gray-200 dark:border-gray-700 hover:border-violet-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {/* Radio dot */}
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                                      isSelected ? 'border-violet-600' : 'border-gray-300'
+                                    }`}>
+                                      {isSelected && (
+                                        <motion.div
+                                          initial={{ scale: 0 }}
+                                          animate={{ scale: 1 }}
+                                          className="w-2.5 h-2.5 bg-violet-600 rounded-full"
+                                        />
+                                      )}
+                                    </div>
+
+                                    {/* Payment icons */}
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0
+                                      bg-gray-100 dark:bg-gray-700">
+                                      {method.id === 'stripe' && '💳'}
+                                      {method.id === 'paypal' && '🅿️'}
+                                      {method.id === 'flutterwave' && '🌍'}
+                                      {method.id === 'chapa' && '🇪🇹'}
+                                    </div>
+
+                                    {/* Name + desc */}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-semibold text-sm text-gray-900 dark:text-white">{method.name}</p>
+                                      <p className="text-xs text-gray-500 truncate">{method.desc}</p>
+                                    </div>
+
+                                    {/* Badge */}
+                                    {'badge' in method && method.badge && (
+                                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${'badgeColor' in method ? method.badgeColor : ''}`}>
+                                        {method.badge}
+                                      </span>
+                                    )}
+
+                                    {/* Card logos for Stripe */}
+                                    {method.id === 'stripe' && (
+                                      <div className="flex gap-1">
+                                        {['VISA', 'MC', 'AMEX'].map((card) => (
+                                          <span key={card} className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-600 text-gray-500 font-mono">{card}</span>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
+                                </motion.button>
+
+                                {/* Chapa wallet chips */}
+                                {isSelected && method.id === 'chapa' && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="mt-2 px-4 pb-3 flex flex-wrap gap-2"
+                                  >
+                                    {['📱 Telebirr', '🏦 CBE Birr', '🌿 Awash', '🏛️ Dashen', '💛 Amole'].map((w) => (
+                                      <span key={w} className="text-xs px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300 font-medium">{w}</span>
+                                    ))}
+                                  </motion.div>
+                                )}
+
+                                {/* Flutterwave method chips */}
+                                {isSelected && method.id === 'flutterwave' && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="mt-2 px-4 pb-3 flex flex-wrap gap-2"
+                                  >
+                                    {['💳 Card', '📲 Mobile Money', '🏦 Bank Transfer', '💵 USSD'].map((w) => (
+                                      <span key={w} className="text-xs px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">{w}</span>
+                                    ))}
+                                  </motion.div>
+                                )}
+
+                                {/* Stripe Elements inline card form */}
+                                {isSelected && method.id === 'stripe' && stripePromise && (
+                                  <Elements stripe={stripePromise}>
+                                    <StripeCardForm
+                                      onPay={(confirmCard) => handlePayment(confirmCard)}
+                                      loading={loading}
+                                      total={total}
+                                      currency={currency}
+                                    />
+                                  </Elements>
                                 )}
                               </div>
-                            </button>
-
-                            {/* Stripe Elements inline card form */}
-                            {selectedPayment === 'stripe' && method.id === 'stripe' && stripePromise && (
-                              <Elements stripe={stripePromise}>
-                                <StripeCardForm
-                                  onPay={(confirmCard) => handlePayment(confirmCard)}
-                                  loading={loading}
-                                  total={total}
-                                  currency={currency}
-                                />
-                              </Elements>
-                            )}
-                          </div>
-                        ))}
+                            );
+                          })
+                        }
                       </div>
 
                       {/* Billing address toggle */}
@@ -1494,31 +1656,65 @@ export default function CheckoutPage() {
 
                     {/* Pay button for non-Stripe methods */}
                     {selectedPayment !== 'stripe' && (
-                      <Button
-                        onClick={() => handlePayment()}
-                        disabled={loading}
-                        className="w-full mt-4 h-11 bg-violet-600 hover:bg-violet-700"
-                      >
-                        <Lock className="w-4 h-4 mr-2" />
-                        {loading ? 'Processing...' : `Pay ${formatPrice(total, currency)}`}
-                      </Button>
+                      <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="mt-4">
+                        <Button
+                          onClick={() => handlePayment()}
+                          disabled={loading}
+                          className="w-full h-13 text-base font-bold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-200 dark:shadow-violet-900/40 transition-all"
+                        >
+                          {loading ? (
+                            <span className="flex items-center gap-2">
+                              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4l-3 3 3 3H4z" />
+                              </svg>
+                              Processing payment…
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2">
+                              <Lock className="w-4 h-4" />
+                              Pay {formatPrice(total, currency)}
+                            </span>
+                          )}
+                        </Button>
+                      </motion.div>
                     )}
 
                     {/* Stripe fallback if no key configured */}
                     {selectedPayment === 'stripe' && !stripePromise && (
-                      <Button
-                        onClick={() => handlePayment()}
-                        disabled={loading}
-                        className="w-full mt-4 h-11 bg-violet-600 hover:bg-violet-700"
-                      >
-                        <Lock className="w-4 h-4 mr-2" />
-                        {loading ? 'Processing...' : `Pay ${formatPrice(total, currency)}`}
-                      </Button>
+                      <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="mt-4">
+                        <Button
+                          onClick={() => handlePayment()}
+                          disabled={loading}
+                          className="w-full h-13 text-base font-bold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg"
+                        >
+                          {loading ? (
+                            <span className="flex items-center gap-2">
+                              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4l-3 3 3 3H4z" />
+                              </svg>
+                              Processing…
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2">
+                              <Lock className="w-4 h-4" />
+                              Pay {formatPrice(total, currency)}
+                            </span>
+                          )}
+                        </Button>
+                      </motion.div>
                     )}
 
+                    {/* Back button */}
                     <Button variant="outline" onClick={() => setStep(1)} className="w-full mt-2">
-                      Back
+                      ← Back to Shipping
                     </Button>
+
+                    {/* Security footnote */}
+                    <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
+                      <Lock className="w-3 h-3" /> Your payment info is encrypted and never stored on our servers.
+                    </p>
                   </motion.div>
                 )}
 
