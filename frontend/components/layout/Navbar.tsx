@@ -18,15 +18,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useCartStore } from '@/lib/store/cartStore';
+import { useLanguageStore, translations } from '@/lib/store/languageStore';
 import { useSiteSettings } from '@/lib/useSiteSettings';
 import { toast } from 'sonner';
 
 const defaultNavLinks = [
-  { href: '/shop', label: 'Shop Now' },
-  { href: '/why-choose-as', label: 'Why Choose As' },
-  { href: '/shop?featured=true', label: 'Best Seller' },
-  { href: '/traditional-club', label: 'Traditional Club' },
-  { href: '/bazar-vendor-apply', label: 'About Our Bazzar' },
+  { href: '/shop', labelKey: 'shopNow', defaultLabel: 'Shop Now' },
+  { href: '/why-choose-as', labelKey: 'whyChooseUs', defaultLabel: 'Why Choose Us' },
+  { href: '/shop?featured=true', labelKey: 'bestSeller', defaultLabel: 'Best Seller' },
+  { href: '/traditional-club', labelKey: 'traditionalClub', defaultLabel: 'Traditional Club' },
+  { href: '/bazar-vendor-apply', labelKey: 'aboutBazaar', defaultLabel: 'About Our Bazaar' },
 ];
 
 export default function Navbar() {
@@ -38,6 +39,8 @@ export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuthStore();
   const itemCount = useCartStore((s) => s.getItemCount());
+  const { language, toggleLanguage, setLanguage } = useLanguageStore();
+  const t = translations[language];
   const router = useRouter();
   const pathname = usePathname();
   const { siteName, logoUrl, navLinks = defaultNavLinks } = useSiteSettings();
@@ -96,20 +99,50 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium transition-colors cursor-pointer hover:underline hover:text-[var(--gold-500)] text-[var(--white)]/80 hover:text-[var(--white)]"
-                style={{ color: 'var(--white)' }}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link: any) => {
+              const label = (link.labelKey && t[link.labelKey as keyof typeof t]) || link.label || link.defaultLabel;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium transition-colors cursor-pointer hover:underline hover:text-[var(--gold-500)] text-[var(--white)]/80 hover:text-[var(--white)]"
+                  style={{ color: 'var(--white)' }}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-2.5 py-1 text-xs font-semibold rounded-full border border-white/20 text-[var(--white)]/90 hover:text-[var(--gold-500)] hover:bg-white/10 flex items-center gap-1.5 transition-all"
+                  title="Switch Language / ቋንቋ ይቀይሩ"
+                >
+                  {language === 'am' ? '🇪🇹 አማርኛ' : '🇺🇸 English'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                <DropdownMenuItem
+                  onClick={() => setLanguage('en')}
+                  className={`flex items-center gap-2 cursor-pointer ${language === 'en' ? 'font-bold text-[var(--gold-600)]' : ''}`}
+                >
+                  <span>🇺🇸</span> English {language === 'en' && '✓'}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setLanguage('am')}
+                  className={`flex items-center gap-2 cursor-pointer ${language === 'am' ? 'font-bold text-[var(--gold-600)]' : ''}`}
+                >
+                  <span>🇪🇹</span> አማርኛ {language === 'am' && '✓'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* Search */}
             <Button
               variant="ghost"

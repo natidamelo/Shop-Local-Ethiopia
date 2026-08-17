@@ -14,6 +14,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useWishlistStore } from '@/lib/store/wishlistStore';
 import { useCartStore } from '@/lib/store/cartStore';
+import { useLanguageStore, translations } from '@/lib/store/languageStore';
 import { useSiteSettings, formatPrice } from '@/lib/useSiteSettings';
 import { rewriteAssetUrl } from '@/lib/rewriteAssetUrl';
 import { getProductUrl } from '@/lib/shopUrls';
@@ -26,21 +27,14 @@ const ETH_RED    = '#c0392b';
 /** Icons for "Why Choose" features (order must match whyChooseFeatures in settings) */
 const WHY_CHOOSE_ICONS = [Shield, Truck, RefreshCw, HeadphonesIcon, Globe, Zap];
 
-const defaultStats = [
-  { value: '50K+', label: 'Happy Customers' },
-  { value: '5K+',  label: 'Handmade Items'  },
-  { value: '200+', label: 'Local Artisans'  },
-  { value: '4.9',  label: 'Average Rating'  },
-];
-
 /** Used to fetch cover image: category slug or 'digital' for type=digital. URLs use category/product structure. */
 const categories = [
-  { name: 'Cultural Cloth', emoji: '👘', href: '/shop/hand-woven-textiles-and-apparel', desc: 'Habesha kemis & netela', coverKey: 'hand-woven-textiles-and-apparel' },
-  { name: 'Handmade',       emoji: '🧺', href: '/shop/artisan-craft-and-home-decor',   desc: 'Pottery, baskets & crafts', coverKey: 'artisan-craft-and-home-decor' },
-  { name: 'Jewelry',        emoji: '📿', href: '/shop/leather-and-leather-goods',     desc: 'Leather & accessories', coverKey: 'leather-and-leather-goods' },
-  { name: 'Art & Decor',    emoji: '🎨', href: '/shop/artisan-craft-and-home-decor',   desc: 'Paintings & wall art', coverKey: 'artisan-craft-and-home-decor' },
-  { name: 'Coffee & Food',  emoji: '☕', href: '/shop/coffee-ceremony-kits',           desc: 'Ceremony sets & spices', coverKey: 'coffee-ceremony-kits' },
-  { name: 'Digital',        emoji: '💻', href: '/shop?type=digital',                    desc: 'Courses & downloads', coverKey: 'digital' },
+  { nameKey: 'culturalCloth', descKey: 'culturalClothDesc', defaultName: 'Cultural Cloth', defaultDesc: 'Habesha kemis & netela', emoji: '👘', href: '/shop/hand-woven-textiles-and-apparel', coverKey: 'hand-woven-textiles-and-apparel' },
+  { nameKey: 'handmade', descKey: 'handmadeDesc', defaultName: 'Handmade', defaultDesc: 'Pottery, baskets & crafts', emoji: '🧺', href: '/shop/artisan-craft-and-home-decor', coverKey: 'artisan-craft-and-home-decor' },
+  { nameKey: 'jewelry', descKey: 'jewelryDesc', defaultName: 'Jewelry', defaultDesc: 'Leather & accessories', emoji: '📿', href: '/shop/leather-and-leather-goods', coverKey: 'leather-and-leather-goods' },
+  { nameKey: 'artDecor', descKey: 'artDecorDesc', defaultName: 'Art & Decor', defaultDesc: 'Paintings & wall art', emoji: '🎨', href: '/shop/artisan-craft-and-home-decor', coverKey: 'artisan-craft-and-home-decor' },
+  { nameKey: 'coffeeFood', descKey: 'coffeeFoodDesc', defaultName: 'Coffee & Food', defaultDesc: 'Ceremony sets & spices', emoji: '☕', href: '/shop/coffee-ceremony-kits', coverKey: 'coffee-ceremony-kits' },
+  { nameKey: 'digital', descKey: 'digitalDesc', defaultName: 'Digital', defaultDesc: 'Courses & downloads', emoji: '💻', href: '/shop?type=digital', coverKey: 'digital' },
 ];
 
 const HERO_TAG_COLORS: Record<string, string> = {
@@ -79,6 +73,16 @@ export default function HomePage() {
   /** Cover image URL per category coverKey (from first product in that category) */
   const [categoryCovers, setCategoryCovers] = useState<Record<string, string>>({});
   const { isAuthenticated } = useAuthStore();
+  const { language } = useLanguageStore();
+  const t = translations[language];
+
+  const defaultStats = [
+    { value: '50K+', label: t.happyCustomers },
+    { value: '5K+',  label: t.handmadeItems  },
+    { value: '200+', label: t.localArtisans  },
+    { value: '4.9',  label: t.averageRating  },
+  ];
+
   const { siteName, hero, testimonials = [], currency, whyChooseHeading, whyChooseSubtitle, whyChooseFeatures = [] } = useSiteSettings();
   const { toggle: toggleWishlist, isInWishlist } = useWishlistStore();
   const addItem = useCartStore((s) => s.addItem);
@@ -315,11 +319,11 @@ export default function HomePage() {
       <section className="py-20" style={{ background: 'var(--eth-section-bg)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--eth-text-muted)' }}>Browse by Category</p>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--eth-text-muted)' }}>{t.browseByCategory}</p>
             <div className="flex items-end justify-between">
-              <h2 className="text-3xl font-extrabold" style={{ color: 'var(--eth-text-primary)' }}>Shop by Category</h2>
+              <h2 className="text-3xl font-extrabold" style={{ color: 'var(--eth-text-primary)' }}>{t.shopByCategory}</h2>
               <Link href="/shop" className="text-sm font-semibold flex items-center gap-1 hover:underline" style={{ color: 'var(--navy-800)' }}>
-                View all <ArrowRight className="w-4 h-4" />
+                {t.viewAll} <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="mt-3 h-0.5 w-16" style={{ background: 'var(--gold-500)' }} />
@@ -328,6 +332,8 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map((cat, i) => {
               const coverUrl = categoryCovers[cat.coverKey];
+              const catName = (cat.nameKey && t[cat.nameKey as keyof typeof t]) || cat.defaultName;
+              const catDesc = (cat.descKey && t[cat.descKey as keyof typeof t]) || cat.defaultDesc;
               return (
                 <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} whileHover={{ y: -4 }}>
                   <Link href={cat.href} className="flex flex-col items-center gap-3 p-2 text-center group transition-all overflow-hidden">
@@ -343,8 +349,8 @@ export default function HomePage() {
                         cat.emoji
                       )}
                     </div>
-                    <span className="text-sm font-bold" style={{ color: 'var(--eth-text-primary)' }}>{cat.name}</span>
-                    <span className="text-xs leading-tight" style={{ color: 'var(--eth-text-muted)' }}>{cat.desc}</span>
+                    <span className="text-sm font-bold" style={{ color: 'var(--eth-text-primary)' }}>{catName}</span>
+                    <span className="text-xs leading-tight" style={{ color: 'var(--eth-text-muted)' }}>{catDesc}</span>
                   </Link>
                 </motion.div>
               );
@@ -359,14 +365,14 @@ export default function HomePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-end justify-between mb-12">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: 'var(--navy-600)', letterSpacing: '0.15em' }}>
-                Featured Collection
+                {t.featuredCollection}
               </p>
-              <h2 className="text-3xl font-light" style={{ color: 'var(--eth-text-primary)', letterSpacing: '-0.02em' }}>Handpicked for You</h2>
-              <p className="mt-1.5 text-sm" style={{ color: 'var(--eth-text-muted)' }}>Authentic cultural items crafted by local artisans</p>
+              <h2 className="text-3xl font-light" style={{ color: 'var(--eth-text-primary)', letterSpacing: '-0.02em' }}>{t.handpickedForYou}</h2>
+              <p className="mt-1.5 text-sm" style={{ color: 'var(--eth-text-muted)' }}>{t.authenticArtisans}</p>
               <div className="mt-3 h-px w-12" style={{ background: 'var(--navy-600)' }} />
             </div>
             <Link href="/shop" className="hidden md:flex items-center gap-1 text-sm hover:underline" style={{ color: 'var(--navy-800)' }}>
-              View All <ArrowRight className="w-4 h-4" />
+              {t.viewAll} <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
 
@@ -420,7 +426,7 @@ export default function HomePage() {
                         className="w-full flex items-center justify-center gap-2 py-3 text-xs font-medium uppercase tracking-wide"
                         style={{ background: 'var(--eth-dark)', color: 'var(--eth-warm)', letterSpacing: '0.08em' }}
                       >
-                        <ShoppingBag className="w-3.5 h-3.5" /> Add to Cart
+                        <ShoppingBag className="w-3.5 h-3.5" /> {t.addToCart}
                       </button>
                     </div>
                   </div>
@@ -448,7 +454,7 @@ export default function HomePage() {
               <motion.button whileHover={{ scale: 1.01 }}
                 className="inline-flex items-center gap-2 px-10 py-3 text-sm font-medium transition-all border"
                 style={{ borderColor: 'var(--eth-text-primary)', color: 'var(--eth-text-primary)', background: 'transparent' }}>
-                See All Products <ArrowRight className="w-4 h-4" />
+                {t.seeAllProducts} <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
           </div>
@@ -460,10 +466,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { icon: Truck,          label: 'Free Delivery',       desc: 'On orders over ETB 5,000' },
-              { icon: RefreshCw,      label: 'Return Guarantee',    desc: '30-day hassle-free returns' },
-              { icon: HeadphonesIcon, label: '24/7 Support',        desc: 'Round the clock assistance' },
-              { icon: Globe,          label: 'Worldwide Delivery',  desc: 'Ship anywhere globally' },
+              { icon: Truck,          label: t.freeDelivery,       desc: t.freeDeliveryDesc },
+              { icon: RefreshCw,      label: t.returnGuarantee,    desc: t.returnGuaranteeDesc },
+              { icon: HeadphonesIcon, label: t.support247,        desc: t.supportDesc },
+              { icon: Globe,          label: t.worldwideDelivery,  desc: t.worldwideDesc },
             ].map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                 className="flex items-center gap-3">
@@ -526,29 +532,29 @@ export default function HomePage() {
       <section className="py-20" style={{ background: 'var(--eth-warm)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold mb-2" style={{ color: 'var(--eth-text-primary)' }}>What Our Customers Say</h2>
+            <h2 className="text-3xl font-extrabold mb-2" style={{ color: 'var(--eth-text-primary)' }}>{t.whatCustomersSay}</h2>
             <div className="mt-3 h-0.5 w-12 mx-auto" style={{ background: 'var(--eth-gold)' }} />
             <p className="mt-3 text-sm max-w-xl mx-auto" style={{ color: 'var(--eth-text-muted)' }}>
               Love our products? Leave a rating and review on any product page — open a product and go to the Reviews tab.
             </p>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {testimonials.map((t, i) => (
+            {testimonials.map((tItem, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="p-5 transition-all"
                 style={{ background: 'var(--eth-card-bg)', border: '1px solid var(--eth-border)', borderRadius: '6px' }}>
                 <div className="flex gap-0.5 mb-3">
-                  {[1,2,3,4,5].map(j => <Star key={j} className={`w-3.5 h-3.5 ${j <= (t.rating ?? 5) ? 'fill-amber-500 text-amber-500' : 'text-amber-200 dark:text-amber-900'}`} />)}
+                  {[1,2,3,4,5].map(j => <Star key={j} className={`w-3.5 h-3.5 ${j <= (tItem.rating ?? 5) ? 'fill-amber-500 text-amber-500' : 'text-amber-200 dark:text-amber-900'}`} />)}
                 </div>
-                <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--eth-text-secondary)' }}>&quot;{t.text}&quot;</p>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--eth-text-secondary)' }}>&quot;{tItem.text}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-[var(--white)] text-sm font-bold flex-shrink-0"
                     style={{ background: i % 2 === 0 ? 'var(--gold-500)' : 'var(--navy-800)' }}>
-                    {(t.avatar || t.name?.charAt(0) || '?').toUpperCase()}
+                    {(tItem.avatar || tItem.name?.charAt(0) || '?').toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-bold" style={{ color: 'var(--eth-text-primary)' }}>{t.name}</p>
-                    <p className="text-xs" style={{ color: 'var(--eth-text-muted)' }}>{t.role}</p>
+                    <p className="text-sm font-bold" style={{ color: 'var(--eth-text-primary)' }}>{tItem.name}</p>
+                    <p className="text-xs" style={{ color: 'var(--eth-text-muted)' }}>{tItem.role}</p>
                   </div>
                 </div>
               </motion.div>
@@ -560,7 +566,7 @@ export default function HomePage() {
       {/* ── PAYMENT METHODS ──────────────────────────────────────────── */}
       <section className="py-14" style={{ background: 'var(--eth-section-bg)', borderTop: '1px solid var(--eth-border)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--eth-text-muted)' }}>Accepted Payment Methods</p>
+          <p className="text-xs font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--eth-text-muted)' }}>{t.acceptedPayments}</p>
           <div className="flex flex-wrap justify-center gap-3">
             {['Stripe','PayPal','Flutterwave','Chapa','Telebirr','CBE Birr','Awash Bank','Dashen Bank'].map((m) => (
               <span key={m} className="px-4 py-2 text-sm font-semibold"
@@ -601,7 +607,7 @@ export default function HomePage() {
               >
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest"
                   style={{ background: 'rgba(212, 162, 76, 0.15)', color: 'var(--gold-500)', border: '1px solid rgba(212, 162, 76, 0.3)' }}>
-                  <MapPin className="w-3 h-3" /> Made in Ethiopia
+                  <MapPin className="w-3 h-3" /> {t.madeInEthiopia}
                 </span>
                 <h2 className="text-3xl lg:text-4xl font-extrabold leading-tight text-white whitespace-pre-line">
                   {hero.ctaBannerTitle.replace(/\\n/g, '\n')}
@@ -622,7 +628,7 @@ export default function HomePage() {
               >
                 {/* mini stats */}
                 <div className="flex gap-4">
-                  {[{ value: '50K+', label: 'Customers' }, { value: '200+', label: 'Artisans' }, { value: '4.9★', label: 'Rating' }].map((s) => (
+                  {[{ value: '50K+', label: t.happyCustomers }, { value: '200+', label: t.localArtisans }, { value: '4.9★', label: t.averageRating }].map((s) => (
                     <div key={s.label} className="text-center px-4 py-2 rounded-lg"
                       style={{ background: 'rgba(212, 162, 76, 0.15)', border: '1px solid rgba(212, 162, 76, 0.25)' }}>
                       <p className="text-lg font-extrabold text-white leading-none">{s.value}</p>
@@ -638,7 +644,7 @@ export default function HomePage() {
                       whileTap={{ scale: 0.97 }}
                       className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-lg"
                       style={{ background: 'var(--gold-500)', color: 'var(--white)', boxShadow: '0 4px 20px rgba(212, 162, 76, 0.3)' }}>
-                      <ShoppingBag className="w-4 h-4" /> Create Free Account
+                      <ShoppingBag className="w-4 h-4" /> {t.createAccount}
                     </motion.button>
                   </Link>
                   <Link href="/shop">
@@ -647,7 +653,7 @@ export default function HomePage() {
                       whileTap={{ scale: 0.97 }}
                       className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-lg"
                       style={{ border: '2px solid var(--navy-600)', color: 'var(--white)' }}>
-                      Browse <ArrowRight className="w-4 h-4" />
+                      {t.browse} <ArrowRight className="w-4 h-4" />
                     </motion.button>
                   </Link>
                 </div>

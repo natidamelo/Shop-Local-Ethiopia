@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # vercel
 .vercel
+
+# local db data
+backend/data/
