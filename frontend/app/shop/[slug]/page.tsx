@@ -86,32 +86,33 @@ function ShopSlugInner() {
     if (!slug) return;
     let cancelled = false;
 
-    // Check if this slug matches a direct product first
-    api.get(`/products/${slug}`)
+    // Check categories first
+    api.get('/products/categories')
       .then((res) => {
         if (cancelled) return;
-        const product = res.data?.data?.product;
-        if (product) {
-          router.replace(getProductUrl(product));
-          return;
+        const list = res.data?.data ?? [];
+        setCategories(list);
+        const cat = list.find((c: Category) => c.slug === slug);
+        if (cat) {
+          setIsCategory(true);
+          setCategoryName(cat.name);
+          fetchCategoryProducts();
+        } else {
+          // If not a category, check if it's a direct product slug
+          checkDirectProduct();
         }
-        checkCategory();
       })
       .catch(() => {
-        if (!cancelled) checkCategory();
+        if (!cancelled) checkDirectProduct();
       });
 
-    const checkCategory = () => {
-      api.get('/products/categories')
+    const checkDirectProduct = () => {
+      api.get(`/products/${slug}`)
         .then((res) => {
           if (cancelled) return;
-          const list = res.data?.data ?? [];
-          setCategories(list);
-          const cat = list.find((c: Category) => c.slug === slug);
-          if (cat) {
-            setIsCategory(true);
-            setCategoryName(cat.name);
-            fetchCategoryProducts();
+          const product = res.data?.data?.product;
+          if (product) {
+            router.replace(getProductUrl(product));
           } else {
             setIsCategory(false);
             router.replace(getShopUrl());
@@ -119,7 +120,6 @@ function ShopSlugInner() {
         })
         .catch(() => {
           if (!cancelled) {
-            setCategories([]);
             setIsCategory(false);
             router.replace(getShopUrl());
           }
