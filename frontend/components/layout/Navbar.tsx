@@ -85,15 +85,15 @@ export default function Navbar() {
       <div className="w-full px-4 sm:px-6 lg:px-8 2xl:px-12">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0 min-w-0 max-w-[160px] xs:max-w-[200px] sm:max-w-none">
             {logoUrl ? (
-              <img src={logoUrl} alt={siteName} className="w-12 h-12 object-contain" />
+              <img src={logoUrl} alt={siteName} className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 object-contain flex-shrink-0" />
             ) : (
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: 'var(--gold-500)' }}>
-                <Package className="w-7 h-7 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--gold-500)' }}>
+                <Package className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
               </div>
             )}
-            <span className="text-xl font-bold" style={{ color: 'var(--gold-500)' }}>
+            <span className="text-sm sm:text-base md:text-xl font-bold whitespace-nowrap truncate" style={{ color: 'var(--gold-500)' }}>
               {siteName}
             </span>
           </Link>
@@ -115,17 +115,18 @@ export default function Navbar() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* Language Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="px-2.5 py-1 text-xs font-semibold rounded-full border border-white/20 text-[var(--white)]/90 hover:text-[var(--gold-500)] hover:bg-white/10 flex items-center gap-1.5 transition-all"
+                  className="px-1.5 sm:px-2.5 py-0.5 h-8 text-[11px] sm:text-xs font-semibold rounded-full border border-white/20 text-[var(--white)]/90 hover:text-[var(--gold-500)] hover:bg-white/10 flex items-center gap-1 transition-all"
                   title="Switch Language / ቋንቋ ይቀይሩ"
                 >
-                  {language === 'am' ? '🇪🇹 አማርኛ' : '🇺🇸 English'}
+                  <span>{language === 'am' ? '🇪🇹' : '🇺🇸'}</span>
+                  <span>{language === 'am' ? 'አማ' : 'EN'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
@@ -156,22 +157,34 @@ export default function Navbar() {
                   setSearchOpen(!searchOpen);
                 }
               }}
-              className="text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]"
+              className="h-8 w-8 sm:h-9 sm:w-9 text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
 
             {/* Theme Toggle */}
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]">
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="h-8 w-8 sm:h-9 sm:w-9 text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
             </Button>
 
             {/* Cart */}
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]">
-                <ShoppingCart className="w-5 h-5" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-8 w-8 sm:h-9 sm:w-9 text-[var(--white)]/80 hover:text-[var(--white)] hover:bg-white/10 hover:text-[var(--gold-500)]"
+              >
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                 {mounted && itemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs" style={{ background: 'var(--gold-500)', color: 'var(--navy-800)' }}>
+                  <Badge
+                    className="absolute -top-1 -right-1 h-4 min-w-4 sm:h-5 sm:min-w-5 flex items-center justify-center p-0.5 text-[10px] sm:text-xs"
+                    style={{ background: 'var(--gold-500)', color: 'var(--navy-800)' }}
+                  >
                     {itemCount > 99 ? '99+' : itemCount}
                   </Badge>
                 )}
