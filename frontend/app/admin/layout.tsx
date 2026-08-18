@@ -16,6 +16,7 @@ const navItemsBeforeProducts = [
   { href: '/admin/users', icon: Users, label: 'Users' },
 ];
 const navItemsAfterProducts = [
+  { href: '/admin/categories', icon: FolderOpen, label: 'Categories' },
   { href: '/admin/inventory', icon: Warehouse, label: 'Inventory' },
   { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
   { href: '/admin/finance', icon: DollarSign, label: 'Finance' },
