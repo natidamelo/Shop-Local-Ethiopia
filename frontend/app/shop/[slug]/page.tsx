@@ -83,50 +83,69 @@ function ShopSlugInner() {
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   useEffect(() => {
-    api.get('/products/categories')
+    if (!slug) return;
+    let cancelled = false;
+
+    // Check if this slug matches a direct product first
+    api.get(`/products/${slug}`)
       .then((res) => {
-        const list = res.data?.data ?? [];
-        setCategories(list);
-        const cat = list.find((c: Category) => c.slug === slug);
-        setIsCategory(!!cat);
-        setCategoryName(cat ? cat.name : slug);
+        if (cancelled) return;
+        const product = res.data?.data?.product;
+        if (product) {
+          router.replace(getProductUrl(product));
+          return;
+        }
+        checkCategory();
       })
       .catch(() => {
-        setCategories([]);
-        setIsCategory(false);
+        if (!cancelled) checkCategory();
       });
-  }, [slug]);
 
-  useEffect(() => {
-    if (isCategory === false && slug) {
-      api.get(`/products/${slug}`)
+    const checkCategory = () => {
+      api.get('/products/categories')
         .then((res) => {
-          const product = res.data?.data?.product;
-          if (product) router.replace(getProductUrl(product));
-          else router.replace(getShopUrl());
+          if (cancelled) return;
+          const list = res.data?.data ?? [];
+          setCategories(list);
+          const cat = list.find((c: Category) => c.slug === slug);
+          if (cat) {
+            setIsCategory(true);
+            setCategoryName(cat.name);
+            fetchCategoryProducts();
+          } else {
+            setIsCategory(false);
+            router.replace(getShopUrl());
+          }
         })
-        .catch(() => router.replace(getShopUrl()));
-      return;
-    }
-    if (!isCategory || !slug) return;
-    let cancelled = false;
-    setLoading(true);
-    const q = new URLSearchParams();
-    q.set('category', slug);
-    q.set('sort', sort);
-    q.set('page', String(page));
-    q.set('limit', '12');
-    api.get(`/products?${q.toString()}`)
-      .then((res) => {
-        if (!cancelled) {
-          setProducts(res.data.data ?? []);
-          setPagination(res.data.pagination ?? { page: 1, pages: 1, total: 0 });
-        }
-      })
-      .catch(() => { if (!cancelled) setProducts([]); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+        .catch(() => {
+          if (!cancelled) {
+            setCategories([]);
+            setIsCategory(false);
+            router.replace(getShopUrl());
+          }
+        });
+    };
+
+    const fetchCategoryProducts = () => {
+      setLoading(true);
+      const q = new URLSearchParams();
+      q.set('category', slug);
+      q.set('sort', sort);
+      q.set('page', String(page));
+      q.set('limit', '12');
+      api.get(`/products?${q.toString()}`)
+        .then((res) => {
+          if (!cancelled) {
+            setProducts(res.data.data ?? []);
+            setPagination(res.data.pagination ?? { page: 1, pages: 1, total: 0 });
+          }
+        })
+        .catch(() => { if (!cancelled) setProducts([]); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    };
+
     return () => { cancelled = true; };
-  }, [slug, isCategory, sort, page, router]);
+  }, [slug, sort, page, router]);
 
   const updateSort = (v: string) => {
     setSort(v);
