@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const productCurrency = product.currency ?? currency;
   const outOfStock = product.type === 'physical' && (product.availableStock ?? product.stock) === 0;
 
-  const discount = product.comparePrice && product.comparePrice > product.price
+  const discount = (product.comparePrice != null && product.comparePrice > product.price && product.comparePrice > 0)
     ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
     : 0;
 
@@ -162,7 +162,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <span className="text-sm font-medium text-foreground">
               {formatPrice(product.price, productCurrency)}
             </span>
-            {product.comparePrice && product.comparePrice > product.price && (
+            {Boolean(product.comparePrice && product.comparePrice > product.price) && (
               <span className="text-xs line-through text-muted-foreground">
                 {formatPrice(product.comparePrice, productCurrency)}
               </span>

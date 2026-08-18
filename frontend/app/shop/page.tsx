@@ -288,6 +288,7 @@ function ShopContent() {
       Object.entries(filters).forEach(([key, val]) => {
         if (val && key !== 'page') params.append(key, String(val));
       });
+      if (!params.has('limit')) params.append('limit', '12');
       if (filters.page > 1) params.append('page', String(filters.page));
       const res = await api.get(`/products?${params.toString()}`);
       setProducts(res.data.data);
