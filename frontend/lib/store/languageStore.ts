@@ -48,6 +48,11 @@ export const translations = {
     digital: 'Digital',
     digitalDesc: 'Courses & downloads',
     seeAllProducts: 'See All Products',
+    someoneIn: 'Someone in',
+    purchased: 'purchased',
+    verifiedBuyer: 'Verified Buyer',
+    justNow: 'Just now',
+    minutesAgo: 'mins ago',
   },
   am: {
     shopNow: 'ይሸምቱ',
@@ -93,6 +98,11 @@ export const translations = {
     digital: 'ዲጂታል',
     digitalDesc: 'ኮርሶችና መጽሐፍት',
     seeAllProducts: 'ሁሉንም ምርቶች ይመልከቱ',
+    someoneIn: 'ደንበኛ በ',
+    purchased: 'ገዝቷል',
+    verifiedBuyer: 'የተረጋገጠ ግዢ',
+    justNow: 'አሁን',
+    minutesAgo: 'ደቂቃዎች በፊት',
   }
 } as const;
 

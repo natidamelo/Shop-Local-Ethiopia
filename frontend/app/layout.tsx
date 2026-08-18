@@ -6,6 +6,7 @@ import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import SiteTitle from '@/components/layout/SiteTitle';
+import RecentPurchaseToast from '@/components/layout/RecentPurchaseToast';
 import { useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <SiteTitle />
             {children}
+            <RecentPurchaseToast />
             <Toaster richColors position="top-right" />
           </ThemeProvider>
         </QueryClientProvider>
